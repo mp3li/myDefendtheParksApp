@@ -1,0 +1,66 @@
+5/28/2026
+
+Course Context:
+
+This course introduces building applications for mobile devices. It covers mobile programming principles and explores the application life cycle, user interfaces, data management, memory management, and web services.
+
+Overview:
+
+For the Final Project, students will design, develop, and publish a functional mobile application that demonstrates core mobile programming concepts. The application must integrate system services, external data sources, user interaction, basic animation, and follow platform programming specifications.
+
+Project Requirements:
+
+1. Location and Background Services:
+
+The application must utilize device location services and at least one background service. These features should enhance the usefulness and marketability of the application.
+
+    • Access the device’s location (GPS or network-based)
+    • Process location data responsibly
+    • Use a background service such as location updates, notifications, or scheduled tasks
+
+2. Broadcast Intents and External APIs:
+
+The application must utilize broadcast intents to interact with system events or external APIs.
+
+    • Listen for at least one broadcast event (system or custom)
+    • Consume data from an external API (such as weather, maps, or public data)
+    • Display retrieved data in the application interface
+
+3. User Interface and Animation:
+
+The application must include a user-friendly interface and basic animation to improve user experience.
+
+    • At least one animated UI element or screen transition
+    • Clearly structured layout and navigation
+    • User interaction through buttons, inputs, or gestures
+
+Deliverables:
+
+    • Completed mobile application
+    • Source code submitted by GitHub link
+    • Brief written description of application features (READ.ME)
+
+Assessment Criteria:
+
+    • Correct use of location and background services
+    • Effective use of broadcast intents and external APIs
+    • Implementation of basic UI animation
+    • Compliance with programming and publishing specifications
+    • Overall functionality and usability
+
+Outcome Alignment:
+
+This Final Project is designed to assess student proficiency across multiple mobile development topics discussed in the course. Not all outcomes are required to be implemented in a single project. Students must demonstrate meaningful alignment with one or more of the following outcomes.
+
+    • Maps and Location Services
+    • Use maps and location data to display user position, markers, routes, or other location-based information.
+    • Geofencing and Contextual UX
+    • Implement virtual geographic boundaries and design application behavior that responds intelligently to location-based events.
+    • Broadcast Intents, Deep Links, and External APIs
+    • Use system events, deep linking, or external services to communicate with other applications or retrieve external data.
+    • Push Notifications
+    • Implement local and/or remote notifications that provide timely and meaningful information to the user while respecting permissions and user experience.
+    • User Interface and Animation
+    • Design a functional user interface that includes basic animation or transitions to improve usability and user engagement.
+
+Each project submission should clearly identify which outcomes are addressed and briefly explain how the implemented features demonstrate those outcomes.

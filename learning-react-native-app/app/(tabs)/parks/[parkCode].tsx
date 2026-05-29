@@ -1,15 +1,17 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ParkDetailContent } from '@/components/park/park-detail-content';
+import { PARK_DETAIL_SECTIONS, ParkDetailContent } from '@/components/park/park-detail-content';
 import { AccessibleButton } from '@/components/accessible-button';
 import { ResponsiveContainer } from '@/components/responsive-layout';
+import { glassSurfaceStyle, ScreenBackground } from '@/components/screen-background';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAppStateContext } from '@/context/app-state-context';
+import { usePageSections } from '@/context/page-sections-context';
 import { useSavedParks } from '@/context/saved-parks-context';
 import { useResponsiveLayout } from '@/hooks/use-responsive-layout';
 import { fetchIndigenousContextByCoordinates } from '@/services/native-land-api';
@@ -19,14 +21,18 @@ import type { IndigenousContextData, NpsPark } from '@/types/parks';
 export default function ParkDetailScreen() {
   const { parkCode } = useLocalSearchParams<{ parkCode: string }>();
   const normalizedParkCode = (parkCode ?? '').toLowerCase();
+  const scrollRef = useRef<ScrollView | null>(null);
+  const sectionOffsets = useRef<Record<string, number>>({});
 
   const { reportError, showSnackbar } = useAppStateContext();
+  const { setJumpHandler, setSections } = usePageSections();
   const { getResponsivePadding } = useResponsiveLayout();
   const { isParkSaved, toggleSavedPark } = useSavedParks();
 
   const [park, setPark] = useState<NpsPark | null>(null);
   const [indigenousContext, setIndigenousContext] = useState<IndigenousContextData | null>(null);
   const [loading, setLoading] = useState(true);
+  const padding = getResponsivePadding();
 
   const loadPark = useCallback(async () => {
     if (!normalizedParkCode) {
@@ -58,8 +64,19 @@ export default function ParkDetailScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      setSections([
+        { id: 'top', label: 'Park Profile' },
+        ...PARK_DETAIL_SECTIONS,
+      ]);
+      setJumpHandler((id) => {
+        scrollRef.current?.scrollTo({ y: sectionOffsets.current[id] ?? 0, animated: true });
+      });
       void loadPark();
-    }, [loadPark])
+      return () => {
+        setSections([]);
+        setJumpHandler(null);
+      };
+    }, [loadPark, setJumpHandler, setSections])
   );
 
   const toggleSaved = useCallback(async () => {
@@ -73,13 +90,14 @@ export default function ParkDetailScreen() {
 
   return (
     <SafeAreaView edges={['left', 'right']} style={styles.safeArea}>
-      <ResponsiveContainer style={{ paddingTop: 0, paddingBottom: getResponsivePadding() }}>
+      <ScreenBackground>
+        <ResponsiveContainer style={{ paddingTop: 0, paddingBottom: padding }}>
         {loading ? (
-          <ThemedView style={styles.statusCard}>
+          <ThemedView style={[styles.statusCard, glassSurfaceStyle]}>
             <ThemedText>Loading park details...</ThemedText>
           </ThemedView>
         ) : !park ? (
-          <ThemedView style={styles.statusCard}>
+          <ThemedView style={[styles.statusCard, glassSurfaceStyle]}>
             <ThemedText>Park not found for code: {normalizedParkCode}</ThemedText>
             <AccessibleButton
               label="Try Reload"
@@ -90,7 +108,7 @@ export default function ParkDetailScreen() {
             />
           </ThemedView>
         ) : (
-          <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <ScrollView ref={scrollRef} contentContainerStyle={[styles.scrollContainer, { paddingTop: padding }]}>
             <ParkDetailContent
               park={park}
               indigenousContext={indigenousContext}
@@ -98,10 +116,16 @@ export default function ParkDetailScreen() {
               onToggleSave={() => {
                 void toggleSaved();
               }}
+              nativeLandTitle={`About Native Land Records Connected to ${park.fullName}`}
+              parkNameForRecords={park.fullName}
+              onSectionLayout={(id, y) => {
+                sectionOffsets.current[id] = y;
+              }}
             />
           </ScrollView>
         )}
-      </ResponsiveContainer>
+        </ResponsiveContainer>
+      </ScreenBackground>
     </SafeAreaView>
   );
 }

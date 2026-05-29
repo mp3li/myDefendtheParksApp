@@ -62,6 +62,38 @@ function getCategoryFromLink(link: string) {
   return 'unknown';
 }
 
+function buildNativeLandUrl(lat: number, lon: number) {
+  const url = new URL(NATIVE_LAND_BASE_URL);
+  url.searchParams.set('maps', 'territories,languages,treaties');
+  url.searchParams.set('position', `${lat},${lon}`);
+  if (NATIVE_LAND_API_KEY) {
+    url.searchParams.set('key', NATIVE_LAND_API_KEY);
+  }
+  return url;
+}
+
+async function requestNativeLand(lat: number, lon: number) {
+  const url = buildNativeLandUrl(lat, lon);
+  const response = await fetch(url.toString(), {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    return {
+      payload: null,
+      errorMessage: `Native Land request failed (${response.status}): ${errorText || 'Unknown error'}`,
+    };
+  }
+
+  return {
+    payload: (await response.json()) as NativeLandResponse,
+    errorMessage: '',
+  };
+}
+
 export async function fetchIndigenousContextByCoordinates(
   latitude: string,
   longitude: string
@@ -87,21 +119,9 @@ export async function fetchIndigenousContextByCoordinates(
     };
   }
 
-  const url = new URL(NATIVE_LAND_BASE_URL);
-  url.searchParams.set('maps', 'territories,languages,treaties');
-  url.searchParams.set('position', `${lat},${lon}`);
-  if (NATIVE_LAND_API_KEY) {
-    url.searchParams.set('key', NATIVE_LAND_API_KEY);
-  }
+  const { payload, errorMessage } = await requestNativeLand(lat, lon);
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      Accept: 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
+  if (!payload) {
     return {
       placeNames: [],
       nameMeanings: [],
@@ -115,11 +135,9 @@ export async function fetchIndigenousContextByCoordinates(
         treaties: 0,
       },
       keyRequired: false,
-      infoMessage: `Native Land request failed (${response.status}): ${errorText || 'Unknown error'}`,
+      infoMessage: errorMessage || 'Unknown Native Land API response.',
     };
   }
-
-  const payload = (await response.json()) as NativeLandResponse;
 
   if (!Array.isArray(payload)) {
     const errorMessage = typeof payload.error === 'string' ? payload.error : 'Unknown Native Land API response.';

@@ -87,6 +87,34 @@ export async function fetchParkByCode(parkCode: string) {
   return result.data?.[0] ?? null;
 }
 
+export async function fetchNationalParksGalleryImages() {
+  const result = await requestNps('/parks', {
+    fields: 'images',
+    limit: '600',
+    start: '0',
+  });
+
+  return sortParksAlphabetically(result.data ?? [])
+    .flatMap((park) =>
+      (park.images ?? []).map((image) => ({
+        ...image,
+        title: image.title ? `${park.fullName}: ${image.title}` : park.fullName,
+      }))
+    )
+    .filter((image) => image.url)
+    .slice(0, 10);
+}
+
+export async function fetchParksForSearch() {
+  const result = await requestNps('/parks', {
+    fields: 'images',
+    limit: '600',
+    start: '0',
+  });
+
+  return sortParksAlphabetically(result.data ?? []);
+}
+
 export async function fetchParkOfTheDay(): Promise<ParkOfTheDay> {
   const dateLabel = new Date().toISOString().slice(0, 10);
   const seed = getDateSeed(dateLabel);

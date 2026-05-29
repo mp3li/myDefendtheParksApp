@@ -1,22 +1,36 @@
-import { Tabs } from 'expo-router';
+import { Tabs, usePathname } from 'expo-router';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors, Palette } from '@/constants/theme';
+import { Colors, Palette, SurfaceColors } from '@/constants/theme';
 import { useSavedParks } from '@/context/saved-parks-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const pathname = usePathname();
   const { savedParks } = useSavedParks();
   const savedCount = savedParks.length;
+  const searchSelected = pathname.startsWith('/states/') || pathname.startsWith('/parks/');
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Palette.yosemiteIvory,
+        tabBarInactiveTintColor: Palette.campfire,
+        tabBarStyle: {
+          backgroundColor: SurfaceColors.navLight,
+          borderTopColor: Palette.summitBlush,
+          shadowColor: Palette.campfire,
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: -2 },
+        },
         headerShown: false,
+        sceneStyle: {
+          backgroundColor: Palette.night,
+        },
         tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
@@ -37,13 +51,43 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'States',
-          tabBarLabel: 'States',
-          tabBarAccessibilityLabel: 'States tab',
+          title: 'Search by State',
+          tabBarLabel: 'Search',
+          tabBarAccessibilityLabel: 'Search tab',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol
+              size={28}
+              name="magnifyingglass"
+              color={searchSelected ? Palette.yosemiteIvory : color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="where-are-we"
+        options={{
+          title: 'Where Are We?',
+          tabBarLabel: 'Where Are We?',
+          tabBarAccessibilityLabel: 'Where Are We tab',
           tabBarIcon: ({ color }) => (
             <IconSymbol
               size={28}
               name="paperplane.fill"
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="journey-mode"
+        options={{
+          title: 'Journey Mode',
+          tabBarLabel: 'Journey',
+          tabBarAccessibilityLabel: 'Journey Mode tab',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol
+              size={28}
+              name="figure.walk"
               color={color}
             />
           ),
@@ -58,7 +102,7 @@ export default function TabLayout() {
           tabBarBadge: savedCount > 0 ? savedCount : undefined,
           tabBarBadgeStyle: {
             backgroundColor: Colors[colorScheme ?? 'light'].tint,
-            color: colorScheme === 'dark' ? Palette.plum : '#ffffff',
+            color: colorScheme === 'dark' ? Palette.graniteShadows : '#ffffff',
           },
           tabBarIcon: ({ color }) => (
             <IconSymbol
@@ -73,7 +117,7 @@ export default function TabLayout() {
         name="states/[stateCode]"
         options={{
           href: null,
-          headerShown: true,
+          headerShown: false,
           title: 'States',
         }}
       />
@@ -81,7 +125,7 @@ export default function TabLayout() {
         name="parks/[parkCode]"
         options={{
           href: null,
-          headerShown: true,
+          headerShown: false,
           title: 'Park Profile',
         }}
       />

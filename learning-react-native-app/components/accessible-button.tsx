@@ -6,6 +6,7 @@ import {
   useWindowDimensions,
   ViewStyle,
 } from 'react-native';
+import { Fonts, Palette, SurfaceColors } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { MIN_TOUCH_TARGET_SIZE } from '@/hooks/use-responsive-layout';
 
@@ -35,9 +36,13 @@ export function AccessibleButton({
   testID,
 }: AccessibleButtonProps) {
   const { scale } = useWindowDimensions();
-  const primaryColor = useThemeColor({ light: '#9a4822', dark: '#f2ad46' }, 'tint');
-  const primaryTextColor = useThemeColor({ light: '#ffffff', dark: '#342834' }, 'text');
-  const backgroundColor = useThemeColor({ light: '#c2d6dd', dark: '#342834' }, 'background');
+  const primaryColor = useThemeColor({ light: Palette.cedar, dark: Palette.campfire }, 'tint');
+  const primaryTextColor = useThemeColor({ light: Palette.yosemiteIvory, dark: Palette.night }, 'text');
+  const secondaryTextColor = useThemeColor({ light: Palette.night, dark: Palette.yosemiteIvory }, 'text');
+  const backgroundColor = useThemeColor(
+    { light: SurfaceColors.glassLight, dark: SurfaceColors.glassDark },
+    'background'
+  );
 
   // Calculate button dimensions to meet minimum 48x48 touch target
   const buttonDimensions = useMemo(() => {
@@ -81,17 +86,17 @@ export function AccessibleButton({
         };
       case 'secondary':
         return {
-          backgroundColor: backgroundColor,
+          backgroundColor,
           borderWidth: 1,
-          borderColor: primaryColor,
-          textColor: primaryColor,
+          borderColor: Palette.campfire,
+          textColor: secondaryTextColor,
         };
       case 'outline':
         return {
-          backgroundColor: 'transparent',
+          backgroundColor: 'rgba(170, 82, 21, 0.18)',
           borderWidth: 2,
-          borderColor: primaryColor,
-          textColor: primaryColor,
+          borderColor: Palette.campfire,
+          textColor: secondaryTextColor,
         };
       default:
         return {
@@ -100,7 +105,7 @@ export function AccessibleButton({
           textColor: primaryTextColor,
         };
     }
-  }, [variant, primaryColor, primaryTextColor, backgroundColor]);
+  }, [variant, primaryColor, primaryTextColor, secondaryTextColor, backgroundColor]);
 
   const buttonStyle = [
     styles.button,
@@ -160,5 +165,6 @@ const styles = StyleSheet.create({
   text: {
     fontWeight: '600',
     textAlign: 'center',
+    fontFamily: Fonts.sans,
   },
 });

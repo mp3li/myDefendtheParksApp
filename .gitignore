@@ -1,0 +1,6 @@
+.DS_Store
+OLD_COLOR_PALETTE_BACKUP_UNTRACKED.md
+learning-react-native-app/.env
+learning-react-native-app/.expo/
+learning-react-native-app/dist/
+learning-react-native-app/node_modules/

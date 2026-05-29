@@ -1,6 +1,7 @@
 import { StyleSheet, Text, type TextProps, useWindowDimensions, AccessibilityRole } from 'react-native';
 import { useMemo } from 'react';
 
+import { Fonts, Palette } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 export type ThemedTextProps = TextProps & {
@@ -25,7 +26,10 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   const color = useThemeColor(
-    { light: lightColor, dark: darkColor },
+    {
+      light: lightColor ?? (type === 'title' || type === 'subtitle' ? Palette.cedar : undefined),
+      dark: darkColor,
+    },
     type === 'link' ? 'tint' : 'text'
   );
   const { scale } = useWindowDimensions();
@@ -68,25 +72,31 @@ export function ThemedText({
 
 const styles = StyleSheet.create({
   default: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 14,
+    lineHeight: 21,
+    fontFamily: Fonts.sans,
   },
   defaultSemiBold: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 14,
+    lineHeight: 21,
     fontWeight: '600',
+    fontFamily: Fonts.sans,
   },
   title: {
-    fontSize: 32,
+    fontSize: 18,
     fontWeight: 'bold',
-    lineHeight: 32,
+    lineHeight: 23,
+    fontFamily: Fonts.serif,
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
+    lineHeight: 21,
+    fontFamily: Fonts.serif,
   },
   link: {
-    lineHeight: 30,
-    fontSize: 16,
+    lineHeight: 22,
+    fontSize: 14,
+    fontFamily: Fonts.sans,
   },
 });

@@ -1,12 +1,35 @@
 import { Image } from 'expo-image';
-import { Linking, Modal, Pressable, StyleSheet, View } from 'react-native';
-import { useMemo, useState } from 'react';
+import { Linking, Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { useMemo } from 'react';
 
 import { AccessibleButton } from '@/components/accessible-button';
+import { CollapsiblePreviewSection } from '@/components/collapsible-preview-section';
+import { glassSurfaceStyle } from '@/components/screen-background';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import {
+  NATIVE_LAND_LANGUAGE_CENTERING_NOTE,
+  NATIVE_LAND_RESOURCE_LINKS,
+} from '@/constants/native-land-resources';
 import { US_STATE_NAME_BY_CODE } from '@/constants/us-states';
-import type { IndigenousContextData, NpsAddress, NpsPark, NpsParkImage } from '@/types/parks';
+import type { IndigenousContextData, NpsAddress, NpsPark } from '@/types/parks';
+
+export const PARK_DETAIL_SECTIONS = [
+  { id: 'native-land', label: 'Native Land Records' },
+  { id: 'placenames', label: 'Placename Records' },
+  { id: 'overview', label: 'Overview' },
+  { id: 'get-involved', label: 'Get Involved' },
+  { id: 'languages', label: 'Languages' },
+  { id: 'territories', label: 'Territories' },
+  { id: 'treaties', label: 'Treaties' },
+  { id: 'native-land-resources', label: 'Native Land Resources and Map Tools' },
+  { id: 'activities', label: 'Activities' },
+  { id: 'topics', label: 'Topics' },
+  { id: 'weather', label: 'Weather' },
+  { id: 'visiting', label: 'Visiting the Park & Park Website' },
+  { id: 'fees', label: 'Entrance Fees' },
+  { id: 'passes', label: 'Entrance Passes' },
+] as const;
 
 const DAY_ORDER = [
   'monday',
@@ -25,6 +48,9 @@ type ParkDetailContentProps = {
   onToggleSave: () => void;
   showHeroSection?: boolean;
   showSaveButton?: boolean;
+  nativeLandTitle?: string;
+  parkNameForRecords?: string;
+  onSectionLayout?: (id: string, y: number) => void;
 };
 
 function getStateNamesFromCodes(codes: string) {
@@ -122,15 +148,28 @@ function makeGetInvolvedLinks(park: NpsPark) {
   return [...unique.entries()].map(([url, label]) => ({ url, label }));
 }
 
-function BulletList({ items }: { items: string[] }) {
+function BulletList({ items, label }: { items: string[]; label: string }) {
   if (items.length === 0) {
-    return <ThemedText>No items listed.</ThemedText>;
+    return <ThemedText>No {label.toLowerCase()} listed.</ThemedText>;
   }
 
   return (
     <View style={styles.bulletContainer}>
       {items.map((item, index) => (
         <ThemedText key={`${item}-${index}`}>• {item}</ThemedText>
+      ))}
+    </View>
+  );
+}
+
+function NativeLandResourceLinks() {
+  return (
+    <View style={styles.bulletContainer}>
+      {NATIVE_LAND_RESOURCE_LINKS.map((resource) => (
+        <View key={resource.label} style={styles.resourceLinkBlock}>
+          <LinkText url={resource.url} label={resource.label} />
+          <ThemedText>{resource.description}</ThemedText>
+        </View>
       ))}
     </View>
   );
@@ -143,9 +182,10 @@ export function ParkDetailContent({
   onToggleSave,
   showHeroSection = true,
   showSaveButton = true,
+  nativeLandTitle,
+  parkNameForRecords,
+  onSectionLayout,
 }: ParkDetailContentProps) {
-  const [selectedImage, setSelectedImage] = useState<NpsParkImage | null>(null);
-
   const stateNames = getStateNamesFromCodes(park.states);
   const primaryImage = park.images[0];
   const visitingHours = getPrimaryOperatingHours(park);
@@ -160,11 +200,15 @@ export function ParkDetailContent({
   const territories = indigenousContext?.territories ?? [];
   const languages = indigenousContext?.languages ?? [];
   const treaties = indigenousContext?.treaties ?? [];
+  const recordPlaceName = parkNameForRecords ?? park.fullName;
+  const sectionLayout = (id: string) => (event: LayoutChangeEvent) => {
+    onSectionLayout?.(id, event.nativeEvent.layout.y);
+  };
 
   return (
     <View style={styles.container}>
       {showHeroSection ? (
-        <ThemedView style={styles.heroCard}>
+        <ThemedView style={[styles.heroCard, glassSurfaceStyle]}>
           {primaryImage?.url ? (
             <Image
               source={{ uri: primaryImage.url }}
@@ -174,13 +218,13 @@ export function ParkDetailContent({
             />
           ) : null}
 
-          <ThemedView style={styles.heroTextBlock}>
+          <View style={styles.heroTextBlock}>
             <ThemedText type="title" accessibilityRole="header" style={styles.parkTitle}>
               {park.fullName}
             </ThemedText>
             <ThemedText>{park.designation || 'National Park Service Site'}</ThemedText>
             <ThemedText>{stateNames || park.states}</ThemedText>
-          </ThemedView>
+          </View>
 
           {showSaveButton ? (
             <AccessibleButton
@@ -193,188 +237,53 @@ export function ParkDetailContent({
         </ThemedView>
       ) : null}
 
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Indigenous Peoples Connected to this Land</ThemedText>
+      <View onLayout={sectionLayout('native-land')}>
+      <CollapsiblePreviewSection
+        title={nativeLandTitle ?? 'About Native Land Records Connected to this Area'}
+        collapsible={indigenousNames.length + nameMeanings.length > 4}>
+        <ThemedText>
+          Defend the Parks uses the Native Land API for language, territory, treaty, source, and
+          available placename records connected to park coordinates.
+        </ThemedText>
+        <ThemedText>
+          This app centers the importance of languages, and also educates about territories and treaties.
+        </ThemedText>
+        <ThemedText>{NATIVE_LAND_LANGUAGE_CENTERING_NOTE}</ThemedText>
         {indigenousContext?.infoMessage ? <ThemedText>{indigenousContext.infoMessage}</ThemedText> : null}
         {indigenousContext?.keyRequired ? (
           <ThemedText>
             Native Land requires an API key to return records. Add `EXPO_PUBLIC_NATIVE_LAND_API_KEY` to continue.
           </ThemedText>
         ) : null}
-        <BulletList items={indigenousNames} />
+      </CollapsiblePreviewSection>
+      </View>
+
+      <View onLayout={sectionLayout('placenames')}>
+      <CollapsiblePreviewSection
+        title={`Placename Records Returned for ${recordPlaceName}`}
+        collapsible={indigenousNames.length + nameMeanings.length > 4}>
+        <BulletList items={indigenousNames} label="placename records" />
         {nameMeanings.length > 0 ? (
-          <ThemedView style={styles.listItem}>
+          <View style={styles.contentGroup}>
             <ThemedText type="defaultSemiBold">Name Meanings Provided by the API</ThemedText>
             {nameMeanings.map((entry, index) => (
               <ThemedText key={`${entry.name}-${entry.meaning}-${index}`}>
                 • {entry.name}: {entry.meaning}
               </ThemedText>
             ))}
-          </ThemedView>
+          </View>
         ) : null}
-      </ThemedView>
+      </CollapsiblePreviewSection>
+      </View>
 
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Overview</ThemedText>
+      <View onLayout={sectionLayout('overview')}>
+      <CollapsiblePreviewSection title="Overview">
         <ThemedText>{park.description || 'No overview was provided by the NPS API.'}</ThemedText>
-      </ThemedView>
+      </CollapsiblePreviewSection>
+      </View>
 
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Territories in This Area</ThemedText>
-        <BulletList items={territories} />
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Languages Connected to This Area</ThemedText>
-        <BulletList items={languages} />
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Treaties Connected to This Area</ThemedText>
-        <BulletList items={treaties} />
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Activities Listed on the National Park Website for {park.fullName}:</ThemedText>
-        <BulletList items={activityNames} />
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Topics Listed by the National Park Service for {park.fullName}:</ThemedText>
-        <BulletList items={topicNames} />
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Weather</ThemedText>
-        <ThemedText>{park.weatherInfo || 'No weather guidance provided.'}</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Visiting the Park</ThemedText>
-
-        {visitingHours ? (
-          <ThemedView style={styles.listItem}>
-            <ThemedText type="defaultSemiBold">{visitingHours.name}</ThemedText>
-            {!!visitingHours.description && <ThemedText>{visitingHours.description}</ThemedText>}
-            {DAY_ORDER.map((day) => {
-              const dayValue = visitingHours.standardHours?.[day];
-              if (!dayValue) {
-                return null;
-              }
-              return (
-                <ThemedText key={`${visitingHours.name}-${day}`}>
-                  {day[0].toUpperCase() + day.slice(1)}: {dayValue}
-                </ThemedText>
-              );
-            })}
-            {visitingHours.exceptions?.length > 0 ? (
-              <ThemedView style={styles.exceptionBlock}>
-                <ThemedText type="defaultSemiBold">Seasonal / Holiday Exceptions</ThemedText>
-                {visitingHours.exceptions.slice(0, 6).map((exception, index) => (
-                  <ThemedText key={`${exception.name}-${exception.startDate}-${index}`}>
-                    {exception.name}: {exception.startDate} to {exception.endDate}
-                  </ThemedText>
-                ))}
-              </ThemedView>
-            ) : null}
-          </ThemedView>
-        ) : (
-          <ThemedText>No operating hours were listed for this park.</ThemedText>
-        )}
-
-        <ThemedView style={styles.listItem}>
-          <ThemedText type="defaultSemiBold">Park Address</ThemedText>
-          {primaryAddress ? (
-            <ThemedText>{extractAddressValue(primaryAddress)}</ThemedText>
-          ) : (
-            <ThemedText>No park address was listed.</ThemedText>
-          )}
-        </ThemedView>
-
-        <ThemedView style={styles.listItem}>
-          <ThemedText type="defaultSemiBold">Park Contact Information</ThemedText>
-          {park.contacts.phoneNumbers.length === 0 ? (
-            <ThemedText>No phone numbers listed.</ThemedText>
-          ) : (
-            park.contacts.phoneNumbers.map((phone, index) => (
-              <ThemedText key={`${phone.phoneNumber}-${index}`}>
-                {phone.type || 'Phone'}: {phone.phoneNumber}
-                {phone.extension ? ` ext. ${phone.extension}` : ''}
-              </ThemedText>
-            ))
-          )}
-          {park.contacts.emailAddresses.length === 0 ? (
-            <ThemedText>No email addresses listed.</ThemedText>
-          ) : (
-            park.contacts.emailAddresses.map((email, index) => (
-              <ThemedText key={`${email.emailAddress}-${index}`}>{email.emailAddress}</ThemedText>
-            ))
-          )}
-          {!!park.directionsInfo && <ThemedText>{park.directionsInfo}</ThemedText>}
-          {!!park.url && <LinkText url={park.url} label="Open official park website" />}
-          {!!park.directionsUrl && <LinkText url={park.directionsUrl} label="Open park directions" />}
-        </ThemedView>
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Entrance Fees</ThemedText>
-        {park.entranceFees.length === 0 ? (
-          <ThemedText>No entrance fee data listed for this park.</ThemedText>
-        ) : (
-          park.entranceFees.map((fee, index) => (
-            <ThemedView key={`${fee.title}-${fee.cost}-${index}`} style={styles.listItem}>
-              <ThemedText type="defaultSemiBold">{fee.title || 'Untitled fee'}</ThemedText>
-              <ThemedText>{fee.cost ? `$${fee.cost}` : 'No cost listed'}</ThemedText>
-              {!!fee.description && <ThemedText>{fee.description}</ThemedText>}
-            </ThemedView>
-          ))
-        )}
-      </ThemedView>
-
-      {park.entrancePasses.length > 0 ? (
-        <ThemedView style={styles.section}>
-          <ThemedText type="subtitle">Entrance Passes</ThemedText>
-          {park.entrancePasses.map((pass, index) => (
-            <ThemedView key={`${pass.title}-${pass.cost}-${index}`} style={styles.listItem}>
-              <ThemedText type="defaultSemiBold">{pass.title || 'Untitled pass'}</ThemedText>
-              <ThemedText>{pass.cost ? `$${pass.cost}` : 'No cost listed'}</ThemedText>
-              {!!pass.description && <ThemedText>{pass.description}</ThemedText>}
-            </ThemedView>
-          ))}
-        </ThemedView>
-      ) : null}
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Image Gallery</ThemedText>
-        {park.images.length === 0 ? (
-          <ThemedText>No images provided by NPS for this park.</ThemedText>
-        ) : (
-          park.images.slice(0, 10).map((image, index) => (
-            <Pressable
-              key={`${image.url}-${index}`}
-              onPress={() => setSelectedImage(image)}
-              accessibilityRole="button"
-              accessibilityLabel={`Open larger photo ${image.title || index + 1}`}>
-              <ThemedView style={styles.imageCard}>
-                <Image
-                  source={{ uri: image.url }}
-                  style={styles.galleryImage}
-                  contentFit="cover"
-                  accessibilityLabel={image.altText || image.title || 'Park photo'}
-                />
-                <ThemedView style={styles.imageMeta}>
-                  <ThemedText type="defaultSemiBold">{image.title || `Photo ${index + 1}`}</ThemedText>
-                  {!!image.caption && <ThemedText>{image.caption}</ThemedText>}
-                  {!!image.credit && <ThemedText>Credit: {image.credit}</ThemedText>}
-                </ThemedView>
-              </ThemedView>
-            </Pressable>
-          ))
-        )}
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Get Involved and Defend this Park</ThemedText>
+      <View onLayout={sectionLayout('get-involved')}>
+      <CollapsiblePreviewSection title="Get Involved and Defend this Park">
         <ThemedText>
           National parks are protected so that future generations can experience these landscapes,
           wildlife, and stories. Protecting these places is a shared responsibility. By learning about
@@ -394,33 +303,197 @@ export function ParkDetailContent({
         {getInvolvedLinks.map((link, index) => (
           <LinkText key={`${link.url}-${index}`} url={link.url} label={link.label} />
         ))}
-      </ThemedView>
+      </CollapsiblePreviewSection>
+      </View>
 
-      <Modal
-        visible={Boolean(selectedImage)}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSelectedImage(null)}>
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
-            <Pressable onPress={() => setSelectedImage(null)} style={styles.closeButton}>
-              <ThemedText type="defaultSemiBold">X</ThemedText>
-            </Pressable>
-            {selectedImage ? (
-              <>
-                <Image
-                  source={{ uri: selectedImage.url }}
-                  style={styles.modalImage}
-                  contentFit="contain"
-                  accessibilityLabel={selectedImage.altText || selectedImage.title || 'Expanded park photo'}
-                />
-                <ThemedText type="defaultSemiBold">{selectedImage.title || 'Park image'}</ThemedText>
-                {!!selectedImage.caption && <ThemedText>{selectedImage.caption}</ThemedText>}
-              </>
+      <View onLayout={sectionLayout('languages')}>
+      <CollapsiblePreviewSection title={`Languages Connected to ${recordPlaceName}`} collapsible={languages.length > 4}>
+        <ThemedText>
+          Languages are listed before territories because language carries relationship to place,
+          memory, and cultural knowledge.
+        </ThemedText>
+        <ThemedText type="defaultSemiBold">Language records returned for {recordPlaceName}</ThemedText>
+        <BulletList items={languages} label="language records" />
+      </CollapsiblePreviewSection>
+      </View>
+
+      <View onLayout={sectionLayout('territories')}>
+      <CollapsiblePreviewSection title={`Territories in ${recordPlaceName}`} collapsible={territories.length > 4}>
+        <BulletList items={territories} label="territory records" />
+      </CollapsiblePreviewSection>
+      </View>
+
+      <View onLayout={sectionLayout('treaties')}>
+      <CollapsiblePreviewSection title={`Treaties Connected to ${recordPlaceName}`} collapsible={treaties.length > 4}>
+        <ThemedText>
+          Treaty records identify agreements returned by Native Land for {recordPlaceName}. They can point
+          to important legal and historical relationships, but the app only displays the record names
+          returned by the API and does not interpret treaty terms.
+        </ThemedText>
+        <ThemedText>
+          A useful place to start your own research is Native Governance Center&apos;s treaty education
+          resources, including Why Treaties Matter: https://nativegov.org/resources/why-do-treaties-matter/
+        </ThemedText>
+        <ThemedText type="defaultSemiBold">Treaty records returned for {recordPlaceName}</ThemedText>
+        <BulletList items={treaties} label="treaty records" />
+      </CollapsiblePreviewSection>
+      </View>
+
+      <View onLayout={sectionLayout('native-land-resources')}>
+      <CollapsiblePreviewSection title="Native Land Public Resources and Map Tools">
+        <ThemedText>
+          These links open Native Land public search and map tools. They are not limited to this
+          exact park or one specific people, so use them as broader research tools after reviewing
+          the records returned for this park above.
+        </ThemedText>
+        <NativeLandResourceLinks />
+      </CollapsiblePreviewSection>
+      </View>
+
+      <View onLayout={sectionLayout('activities')}>
+      <CollapsiblePreviewSection
+        title={`Activities Listed on the National Park Website for ${park.fullName}:`}
+        collapsible={activityNames.length > 4}>
+        <BulletList items={activityNames} label="activities" />
+      </CollapsiblePreviewSection>
+      </View>
+
+      <View onLayout={sectionLayout('topics')}>
+      <CollapsiblePreviewSection
+        title={`Topics Listed by the National Park Service for ${park.fullName}:`}
+        collapsible={topicNames.length > 4}>
+        <BulletList items={topicNames} label="topics" />
+      </CollapsiblePreviewSection>
+      </View>
+
+      <View onLayout={sectionLayout('weather')}>
+      <CollapsiblePreviewSection title="Weather" collapsible={false}>
+        <ThemedText>{park.weatherInfo || 'No weather guidance provided.'}</ThemedText>
+      </CollapsiblePreviewSection>
+      </View>
+
+      <View onLayout={sectionLayout('visiting')}>
+      <CollapsiblePreviewSection title="Visiting the Park & Park Website">
+        {primaryAddress ? (
+          <ThemedText>
+            {park.fullName} is located at {extractAddressValue(primaryAddress).replace(/\n/g, ', ')}.
+          </ThemedText>
+        ) : null}
+        {visitingHours ? (
+          <View style={styles.contentGroup}>
+            <ThemedText type="defaultSemiBold" style={styles.contentSubheader}>
+              Operating Hours & Visitor Center Hours
+            </ThemedText>
+            <ThemedText type="defaultSemiBold">{visitingHours.name}</ThemedText>
+            {!!visitingHours.description && <ThemedText>{visitingHours.description}</ThemedText>}
+            <View style={styles.bulletContainer}>
+            {DAY_ORDER.map((day) => {
+              const dayValue = visitingHours.standardHours?.[day];
+              if (!dayValue) {
+                return null;
+              }
+              return (
+                <ThemedText key={`${visitingHours.name}-${day}`}>
+                  {day[0].toUpperCase() + day.slice(1)}: {dayValue}
+                </ThemedText>
+              );
+            })}
+            </View>
+            {visitingHours.exceptions?.length > 0 ? (
+              <View style={styles.contentGroup}>
+                <ThemedText type="defaultSemiBold" style={styles.contentSubheader}>
+                  Seasonal / Holiday Exceptions
+                </ThemedText>
+                {visitingHours.exceptions.slice(0, 6).map((exception, index) => (
+                  <ThemedText key={`${exception.name}-${exception.startDate}-${index}`}>
+                    • {exception.name}: {exception.startDate} to {exception.endDate}
+                  </ThemedText>
+                ))}
+              </View>
             ) : null}
           </View>
+        ) : (
+          <ThemedText>No operating hours were listed for this park.</ThemedText>
+        )}
+
+        <View style={styles.contentGroup}>
+          <ThemedText type="defaultSemiBold" style={styles.contentSubheader}>
+            Park Address
+          </ThemedText>
+          {primaryAddress ? (
+            <ThemedText>{extractAddressValue(primaryAddress)}</ThemedText>
+          ) : (
+            <ThemedText>No park address was listed.</ThemedText>
+          )}
         </View>
-      </Modal>
+
+        <View style={styles.contentGroup}>
+          <ThemedText type="defaultSemiBold" style={styles.contentSubheader}>
+            Park Contact Information
+          </ThemedText>
+          {park.contacts.phoneNumbers.length === 0 ? (
+            <ThemedText>No phone numbers listed.</ThemedText>
+          ) : (
+            park.contacts.phoneNumbers.map((phone, index) => (
+              <ThemedText key={`${phone.phoneNumber}-${index}`}>
+                • {phone.type || 'Phone'}: {phone.phoneNumber}
+                {phone.extension ? ` ext. ${phone.extension}` : ''}
+              </ThemedText>
+            ))
+          )}
+          {park.contacts.emailAddresses.length === 0 ? (
+            <ThemedText>No email addresses listed.</ThemedText>
+          ) : (
+            park.contacts.emailAddresses.map((email, index) => (
+              <ThemedText key={`${email.emailAddress}-${index}`}>• {email.emailAddress}</ThemedText>
+            ))
+          )}
+        </View>
+
+        <View style={styles.contentGroup}>
+          <ThemedText type="defaultSemiBold" style={styles.contentSubheader}>
+            Park Website & Directions
+          </ThemedText>
+          {!!park.directionsInfo && <ThemedText>{park.directionsInfo}</ThemedText>}
+          {!!park.url && <LinkText url={park.url} label="Open official park website" />}
+          {!!park.directionsUrl && <LinkText url={park.directionsUrl} label="Open park directions" />}
+        </View>
+      </CollapsiblePreviewSection>
+      </View>
+
+      <View onLayout={sectionLayout('fees')}>
+      <CollapsiblePreviewSection title="Entrance Fees" collapsible={park.entranceFees.length > 1}>
+        {park.entranceFees.length === 0 ? (
+          <ThemedText>No entrance fee data listed for this park.</ThemedText>
+        ) : (
+          park.entranceFees.map((fee, index) => (
+            <View key={`${fee.title}-${fee.cost}-${index}`} style={styles.listItem}>
+              <ThemedText type="defaultSemiBold" style={styles.contentSubheader}>
+                {fee.title || 'Untitled fee'}
+              </ThemedText>
+              <ThemedText>{fee.cost ? `$${fee.cost}` : 'No cost listed'}</ThemedText>
+              {!!fee.description && <ThemedText>{fee.description}</ThemedText>}
+            </View>
+          ))
+        )}
+      </CollapsiblePreviewSection>
+      </View>
+
+      {park.entrancePasses.length > 0 ? (
+        <View onLayout={sectionLayout('passes')}>
+        <CollapsiblePreviewSection title="Entrance Passes" collapsible={park.entrancePasses.length > 1}>
+          {park.entrancePasses.map((pass, index) => (
+            <View key={`${pass.title}-${pass.cost}-${index}`} style={styles.listItem}>
+              <ThemedText type="defaultSemiBold" style={styles.contentSubheader}>
+                {pass.title || 'Untitled pass'}
+              </ThemedText>
+              <ThemedText>{pass.cost ? `$${pass.cost}` : 'No cost listed'}</ThemedText>
+              {!!pass.description && <ThemedText>{pass.description}</ThemedText>}
+            </View>
+          ))}
+        </CollapsiblePreviewSection>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -446,8 +519,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   parkTitle: {
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 22,
+    lineHeight: 28,
   },
   section: {
     borderRadius: 14,
@@ -455,9 +528,18 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   listItem: {
-    borderRadius: 10,
-    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(102, 49, 12, 0.24)',
+    paddingTop: 10,
     gap: 6,
+  },
+  contentGroup: {
+    gap: 6,
+  },
+  contentSubheader: {
+    color: '#66310c',
+    fontSize: 15,
+    lineHeight: 20,
   },
   exceptionBlock: {
     borderRadius: 8,
@@ -467,46 +549,7 @@ const styles = StyleSheet.create({
   bulletContainer: {
     gap: 6,
   },
-  imageCard: {
-    borderRadius: 10,
-    overflow: 'hidden',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#9aa6b2',
-    marginBottom: 10,
-  },
-  galleryImage: {
-    width: '100%',
-    height: 160,
-    backgroundColor: '#dde4ea',
-  },
-  imageMeta: {
-    padding: 10,
-    gap: 4,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 18,
-  },
-  modalCard: {
-    width: '100%',
-    borderRadius: 12,
-    padding: 12,
-    gap: 10,
-    backgroundColor: '#111',
-  },
-  modalImage: {
-    width: '100%',
-    height: 380,
-    backgroundColor: '#000',
-  },
-  closeButton: {
-    alignSelf: 'flex-end',
-    borderRadius: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    backgroundColor: '#ffffff',
+  resourceLinkBlock: {
+    gap: 2,
   },
 });

@@ -1,29 +1,47 @@
 import type { Href } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { useCallback } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AccessibleButton } from '@/components/accessible-button';
 import { ResponsiveContainer } from '@/components/responsive-layout';
+import { glassSurfaceStyle, ScreenBackground } from '@/components/screen-background';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAppStateContext } from '@/context/app-state-context';
+import { usePageSections } from '@/context/page-sections-context';
 import { useSavedParks } from '@/context/saved-parks-context';
 import { useResponsiveLayout } from '@/hooks/use-responsive-layout';
 
 export default function SavedParksScreen() {
   const router = useRouter();
   const { showSnackbar } = useAppStateContext();
+  const { setJumpHandler, setSections } = usePageSections();
   const { getResponsiveGap, getResponsivePadding, isTablet } = useResponsiveLayout();
   const { isHydrated, savedParks, removePark } = useSavedParks();
 
   const gap = getResponsiveGap();
   const padding = getResponsivePadding();
 
+  useFocusEffect(
+    useCallback(() => {
+      setSections([{ id: 'saved', label: 'Saved Parks' }]);
+      setJumpHandler(null);
+
+      return () => {
+        setSections([]);
+        setJumpHandler(null);
+      };
+    }, [setJumpHandler, setSections])
+  );
+
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeArea}>
-      <ResponsiveContainer style={{ gap: padding }}>
-        <ThemedView style={{ gap }}>
+    <SafeAreaView edges={['left', 'right']} style={styles.safeArea}>
+      <ScreenBackground>
+        <ResponsiveContainer style={{ gap: padding }}>
+        <ThemedView style={[styles.card, glassSurfaceStyle, { gap }]}>
           <ThemedText type="title" accessibilityRole="header">
             My Saved Parks
           </ThemedText>
@@ -41,7 +59,7 @@ export default function SavedParksScreen() {
             keyExtractor={(item) => item.parkCode}
             contentContainerStyle={{ gap, paddingBottom: 28 }}
             renderItem={({ item }) => (
-              <ThemedView style={[styles.card, { gap }]}>
+              <ThemedView style={[styles.card, glassSurfaceStyle, { gap }]}>
                 <ThemedText type="defaultSemiBold">{item.fullName}</ThemedText>
                 <ThemedText>{item.designation || 'National Park Service Site'}</ThemedText>
                 <ThemedText>States: {item.states}</ThemedText>
@@ -66,7 +84,7 @@ export default function SavedParksScreen() {
               </ThemedView>
             )}
             ListEmptyComponent={
-              <ThemedView style={[styles.card, { gap }]}> 
+              <ThemedView style={[styles.card, glassSurfaceStyle, { gap }]}>
                 <ThemedText>You have not saved any parks yet.</ThemedText>
                 <AccessibleButton
                   label="Browse States"
@@ -77,7 +95,8 @@ export default function SavedParksScreen() {
             }
           />
         )}
-      </ResponsiveContainer>
+        </ResponsiveContainer>
+      </ScreenBackground>
     </SafeAreaView>
   );
 }

@@ -108,6 +108,13 @@ export type IndigenousContextData = {
   infoMessage?: string;
 };
 
+export type NearbySovereignty = {
+  name: string;
+  category: 'territory' | 'language' | 'treaty';
+  approximateDistanceMeters: number;
+  referenceLinks: string[];
+};
+
 export type SavedPark = {
   parkCode: string;
   fullName: string;

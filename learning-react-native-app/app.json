@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "soft210",
+    "name": "Defend the Parks by mp3li",
     "slug": "soft210",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,7 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Defend the Parks uses your location to show Indigenous territory, language, and treaty records for where you are.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Journey Mode can use background location to check whether your returned Indigenous territory context changes while you travel.",
+        "NSLocationAlwaysUsageDescription": "Journey Mode can use background location to check whether your returned Indigenous territory context changes while you travel."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -39,7 +44,15 @@
           }
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-location",
+        {
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,

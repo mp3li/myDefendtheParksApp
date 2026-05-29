@@ -1,23 +1,28 @@
 import type { Href } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ParkDetailContent } from '@/components/park/park-detail-content';
+import { PARK_DETAIL_SECTIONS, ParkDetailContent } from '@/components/park/park-detail-content';
 import { AccessibleButton } from '@/components/accessible-button';
 import { ResponsiveContainer } from '@/components/responsive-layout';
+import { glassSurfaceStyle, ScreenBackground } from '@/components/screen-background';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { US_STATE_NAME_BY_CODE } from '@/constants/us-states';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { NationalParksPictureGallery } from '@/components/park/national-parks-picture-gallery';
 import { Colors } from '@/constants/theme';
+import { US_STATE_NAME_BY_CODE } from '@/constants/us-states';
 import { useAppStateContext } from '@/context/app-state-context';
+import { usePageSections } from '@/context/page-sections-context';
 import { useSavedParks } from '@/context/saved-parks-context';
 import { useResponsiveLayout } from '@/hooks/use-responsive-layout';
 import { fetchIndigenousContextByCoordinates } from '@/services/native-land-api';
-import { fetchParkOfTheDay } from '@/services/nps-api';
-import type { IndigenousContextData, ParkOfTheDay } from '@/types/parks';
+import { fetchNationalParksGalleryImages, fetchParkOfTheDay } from '@/services/nps-api';
+import type { IndigenousContextData, NpsParkImage, ParkOfTheDay } from '@/types/parks';
 
 function formatDateWithOrdinal(isoDate: string) {
   const date = new Date(isoDate);
@@ -52,8 +57,12 @@ function getFeaturedStateName(stateCodes: string) {
 export default function HomeScreen() {
   const router = useRouter();
   const { reportError, showSnackbar } = useAppStateContext();
+  const { setJumpHandler, setSections } = usePageSections();
   const { isParkSaved, toggleSavedPark } = useSavedParks();
   const { getResponsiveGap, getResponsivePadding } = useResponsiveLayout();
+  const scrollRef = useRef<ScrollView | null>(null);
+  const sectionOffsets = useRef<Record<string, number>>({});
+  const featuredDetailOffset = useRef(0);
 
   const gap = getResponsiveGap();
   const padding = getResponsivePadding();
@@ -62,6 +71,8 @@ export default function HomeScreen() {
   const [featuredIndigenousContext, setFeaturedIndigenousContext] =
     useState<IndigenousContextData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [aboutExpanded, setAboutExpanded] = useState(false);
+  const [galleryImages, setGalleryImages] = useState<NpsParkImage[]>([]);
 
   const loadParkOfTheDay = useCallback(async () => {
     try {
@@ -85,6 +96,34 @@ export default function HomeScreen() {
     void loadParkOfTheDay();
   }, [loadParkOfTheDay]);
 
+  useEffect(() => {
+    void fetchNationalParksGalleryImages()
+      .then(setGalleryImages)
+      .catch((error) => {
+        reportError(error, 'Unable to load the national parks picture gallery.');
+      });
+  }, [reportError]);
+
+  useFocusEffect(
+    useCallback(() => {
+    setSections([
+      { id: 'about', label: 'Welcome' },
+      { id: 'gallery', label: 'National Parks Picture Gallery' },
+      { id: 'featured', label: 'Featured Park' },
+      ...PARK_DETAIL_SECTIONS,
+      { id: 'quick-actions', label: 'Quick Actions' },
+    ]);
+    setJumpHandler((id) => {
+      scrollRef.current?.scrollTo({ y: sectionOffsets.current[id] ?? 0, animated: true });
+    });
+
+    return () => {
+      setSections([]);
+      setJumpHandler(null);
+    };
+    }, [setJumpHandler, setSections])
+  );
+
   const toggleSavedFeaturedPark = useCallback(async () => {
     if (!parkOfTheDay?.park) {
       return;
@@ -95,63 +134,113 @@ export default function HomeScreen() {
   }, [parkOfTheDay?.park, showSnackbar, toggleSavedPark]);
 
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeArea}>
-      <ResponsiveContainer style={{ gap: padding }}>
-        <ScrollView contentContainerStyle={{ gap: padding, paddingBottom: 28 }}>
-          <ThemedView style={{ gap }}>
-            <ThemedText
-              type="subtitle"
-              style={styles.mainTitle}
-              lightColor={Colors.light.tint}
-              darkColor={Colors.dark.tint}
-              accessibilityRole="header">
-              myDefendtheParksApp
-            </ThemedText>
-            <ThemedText>
-              Welcome to myDefendtheParksApp made by mp3li. This app is in active development.
-              {'\n\n'}
-              This app helps you explore national parks while also learning about the deeper history
-              of the land they exist on. Many of the places we now call parks have been home to
-              Indigenous nations for thousands of years. By viewing parks alongside the peoples
-              connected to them, we can better understand the full story of these landscapes.
-              {'\n\n'}
-              Inside this app you can browse parks, learn about the Indigenous nations associated
-              with the land, read about the history of each park, and find ways to support and
-              protect these places for future generations.
-              {'\n\n'}
-              National parks belong to all of us to care for, but their histories reach far beyond the
-              park system itself. Understanding that history is one step toward protecting these
-              lands and respecting the people connected to them.
-              {'\n\n'}
-              Explore the parks, learn the history of the land, and help defend the parks.
-            </ThemedText>
+    <SafeAreaView edges={['left', 'right']} style={styles.safeArea}>
+      <ScreenBackground>
+        <ResponsiveContainer style={{ gap: padding, paddingTop: 0 }}>
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={{ gap: padding, paddingTop: padding, paddingBottom: 28 }}>
+          <ThemedView
+            style={[styles.card, glassSurfaceStyle, { gap }]}
+            onLayout={(event) => {
+              sectionOffsets.current.about = event.nativeEvent.layout.y;
+            }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={aboutExpanded ? 'Collapse about the app' : 'Expand about the app'}
+              style={styles.expandHeader}
+              onPress={() => setAboutExpanded((current) => !current)}>
+              <ThemedText type="subtitle" style={styles.expandTitle} accessibilityRole="header">
+                Welcome to Defend the Parks by mp3li
+              </ThemedText>
+              <View style={styles.chevronBadge}>
+                <IconSymbol
+                  name={aboutExpanded ? 'chevron.up' : 'chevron.down'}
+                  size={24}
+                  color={Colors.dark.text}
+                />
+              </View>
+            </Pressable>
+            <View style={!aboutExpanded && styles.aboutPreview}>
+              <ThemedText>
+                This app helps you explore national parks while also learning about the deeper
+                history of the land they exist on. Many of the places we now call parks have been
+                home to Indigenous nations for thousands of years.
+                {'\n\n'}
+                With Defend the Parks, you can browse National Parks and other locations maintained
+                by the National Park Service, like historic sites, trails, memorials, battlefields,
+                and monuments. Alongside National Park information, you can learn about the
+                Indigenous sovereignties and languages associated with the land, read about the
+                history of each park, and find ways to support and protect these places for future
+                generations. In upcoming iterations this app will include a filter system to further
+                education about these places and their Indigenous history.
+                {'\n\n'}
+                The history of National Parks reaches far beyond the park system itself. Understanding
+                that history is one step toward protecting these lands and respecting the people
+                connected to them.
+                {'\n\n'}
+                Defend the Parks uses the National Park Service API for park information and the
+                Native Land API for language, territory, treaty, source, and available placename
+                records connected to park and user coordinates.
+              </ThemedText>
+            </View>
           </ThemedView>
 
-          <ThemedView style={[styles.card, { gap }]}>
-            {loading ? (
-              <ThemedText>Loading featured park...</ThemedText>
-            ) : parkOfTheDay ? (
-              <>
-                <ThemedText type="subtitle">
-                  Featured Park of the Day - {formatDateWithOrdinal(parkOfTheDay.dateLabel)}
-                </ThemedText>
-                {parkOfTheDay.park.images[0]?.url ? (
-                  <Image
-                    source={{ uri: parkOfTheDay.park.images[0].url }}
-                    style={styles.featuredImage}
-                    contentFit="cover"
-                    accessibilityLabel={parkOfTheDay.park.images[0].altText || parkOfTheDay.park.fullName}
+          <View
+            onLayout={(event) => {
+              sectionOffsets.current.gallery = event.nativeEvent.layout.y;
+            }}>
+            <NationalParksPictureGallery images={galleryImages} />
+          </View>
+
+          <View
+            onLayout={(event) => {
+              sectionOffsets.current.featured = event.nativeEvent.layout.y;
+            }}>
+            <ThemedView style={[styles.card, glassSurfaceStyle, { gap }]}>
+              {loading ? (
+                <ThemedText>Loading featured park...</ThemedText>
+              ) : parkOfTheDay ? (
+                <>
+                  <ThemedText style={styles.featuredDate}>
+                    {formatDateWithOrdinal(parkOfTheDay.dateLabel)}
+                  </ThemedText>
+                  <ThemedText type="subtitle">
+                    Featured Park of the Day: {parkOfTheDay.park.fullName}
+                  </ThemedText>
+                  {parkOfTheDay.park.images[0]?.url ? (
+                    <Image
+                      source={{ uri: parkOfTheDay.park.images[0].url }}
+                      style={styles.featuredImage}
+                      contentFit="cover"
+                      accessibilityLabel={parkOfTheDay.park.images[0].altText || parkOfTheDay.park.fullName}
+                    />
+                  ) : null}
+                  {parkOfTheDay.park.images[0]?.credit ? (
+                    <ThemedText style={styles.imageCredit}>
+                      Credit: {parkOfTheDay.park.images[0].credit}
+                    </ThemedText>
+                  ) : null}
+                  <ThemedText>State: {getFeaturedStateName(parkOfTheDay.park.states)}</ThemedText>
+                  <AccessibleButton
+                    label={isParkSaved(parkOfTheDay.park.parkCode) ? 'Remove From My List' : 'Save This Park To My List'}
+                    onPress={() => {
+                      void toggleSavedFeaturedPark();
+                    }}
+                    variant={isParkSaved(parkOfTheDay.park.parkCode) ? 'secondary' : 'primary'}
                   />
-                ) : null}
-                <ThemedText type="defaultSemiBold">{parkOfTheDay.park.fullName}</ThemedText>
-                <ThemedText>State: {getFeaturedStateName(parkOfTheDay.park.states)}</ThemedText>
-                <AccessibleButton
-                  label={isParkSaved(parkOfTheDay.park.parkCode) ? 'Remove From My List' : 'Save This Park To My List'}
-                  onPress={() => {
-                    void toggleSavedFeaturedPark();
-                  }}
-                  variant={isParkSaved(parkOfTheDay.park.parkCode) ? 'secondary' : 'primary'}
-                />
+                </>
+              ) : (
+                <ThemedText>No featured park is available right now.</ThemedText>
+              )}
+            </ThemedView>
+            {parkOfTheDay ? (
+              <View
+                style={{ gap, marginTop: padding }}
+                onLayout={(event) => {
+                  featuredDetailOffset.current =
+                    (sectionOffsets.current.featured ?? 0) + event.nativeEvent.layout.y;
+                }}>
                 <ParkDetailContent
                   park={parkOfTheDay.park}
                   indigenousContext={featuredIndigenousContext}
@@ -161,14 +250,21 @@ export default function HomeScreen() {
                   }}
                   showHeroSection={false}
                   showSaveButton={false}
+                  nativeLandTitle={`About Native Land Records Connected to ${parkOfTheDay.park.fullName}`}
+                  parkNameForRecords={parkOfTheDay.park.fullName}
+                  onSectionLayout={(id, y) => {
+                    sectionOffsets.current[id] = featuredDetailOffset.current + y;
+                  }}
                 />
-              </>
-            ) : (
-              <ThemedText>No featured park is available right now.</ThemedText>
-            )}
-          </ThemedView>
+              </View>
+            ) : null}
+          </View>
 
-          <ThemedView style={[styles.card, { gap }]}>
+          <ThemedView
+            style={[styles.card, glassSurfaceStyle, { gap }]}
+            onLayout={(event) => {
+              sectionOffsets.current['quick-actions'] = event.nativeEvent.layout.y;
+            }}>
             <ThemedText type="subtitle">Quick Actions</ThemedText>
             <AccessibleButton
               label="Browse All 50 States"
@@ -192,7 +288,8 @@ export default function HomeScreen() {
             />
           </ThemedView>
         </ScrollView>
-      </ResponsiveContainer>
+        </ResponsiveContainer>
+      </ScreenBackground>
     </SafeAreaView>
   );
 }
@@ -201,19 +298,46 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  mainTitle: {
-    fontSize: 27,
-    lineHeight: 33,
-    fontStyle: 'italic',
-  },
   card: {
     borderRadius: 12,
     padding: 14,
+  },
+  expandHeader: {
+    minHeight: 38,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  expandTitle: {
+    flex: 1,
+  },
+  chevronBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.light.tint,
+    borderWidth: 1,
+    borderColor: Colors.light.icon,
+  },
+  aboutPreview: {
+    maxHeight: 116,
+    overflow: 'hidden',
   },
   featuredImage: {
     width: '100%',
     height: 220,
     borderRadius: 10,
-    backgroundColor: '#dce5eb',
+    backgroundColor: Colors.light.background,
+  },
+  featuredDate: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  imageCredit: {
+    fontSize: 12,
+    lineHeight: 16,
   },
 });
