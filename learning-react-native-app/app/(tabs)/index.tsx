@@ -2,7 +2,7 @@ import type { Href } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -23,6 +23,9 @@ import { useResponsiveLayout } from '@/hooks/use-responsive-layout';
 import { fetchIndigenousContextByCoordinates } from '@/services/native-land-api';
 import { fetchNationalParksGalleryImages, fetchParkOfTheDay } from '@/services/nps-api';
 import type { IndigenousContextData, NpsParkImage, ParkOfTheDay } from '@/types/parks';
+
+const WEB_ACCESS_CODE = 'REDACTED_ACCESS_CODE';
+const WEB_ACCESS_STORAGE_KEY = 'defendTheParksWebAccessGranted';
 
 function formatDateWithOrdinal(isoDate: string) {
   const date = new Date(isoDate);
@@ -73,6 +76,20 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [galleryImages, setGalleryImages] = useState<NpsParkImage[]>([]);
+  const [webAccessChecked, setWebAccessChecked] = useState(Platform.OS !== 'web');
+  const [webAccessGranted, setWebAccessGranted] = useState(Platform.OS !== 'web');
+  const [accessCodeInput, setAccessCodeInput] = useState('');
+  const [accessError, setAccessError] = useState('');
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') {
+      return;
+    }
+
+    const storedAccess = window.localStorage.getItem(WEB_ACCESS_STORAGE_KEY);
+    setWebAccessGranted(storedAccess === 'true');
+    setWebAccessChecked(true);
+  }, []);
 
   const loadParkOfTheDay = useCallback(async () => {
     try {
@@ -133,9 +150,74 @@ export default function HomeScreen() {
     showSnackbar(savedNow ? 'Park saved to your list.' : 'Park removed from your list.', 'info');
   }, [parkOfTheDay?.park, showSnackbar, toggleSavedPark]);
 
+  const submitAccessCode = useCallback(() => {
+    const normalizedCode = accessCodeInput.trim().toUpperCase();
+    if (normalizedCode !== WEB_ACCESS_CODE) {
+      setAccessError('That access code is not valid.');
+      return;
+    }
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.localStorage.setItem(WEB_ACCESS_STORAGE_KEY, 'true');
+    }
+
+    setWebAccessGranted(true);
+    setAccessError('');
+  }, [accessCodeInput]);
+
   return (
     <SafeAreaView edges={['left', 'right']} style={styles.safeArea}>
       <ScreenBackground>
+        <Modal
+          visible={Platform.OS === 'web' && webAccessChecked && !webAccessGranted}
+          transparent
+          animationType="fade">
+          <View style={styles.accessOverlay}>
+            <ThemedView style={[styles.accessCard, glassSurfaceStyle]}>
+              <ThemedText
+                type="title"
+                accessibilityRole="header"
+                lightColor={Colors.light.icon}
+                darkColor={Colors.dark.text}>
+                Welcome to Defend the Parks by mp3li
+              </ThemedText>
+              <ThemedText>
+                Defend the Parks is a mobile app for exploring National Parks and other locations
+                maintained by the National Park Service while learning about Indigenous languages,
+                territories, treaties, placenames, nearby sovereignty records, and public Native Land
+                resources. The app includes &apos;Where Are We? Mode&apos; for GPS-based land context on where
+                you are currently located, an in-app compass, and &apos;Journey Mode&apos; for travel-aware
+                updates when a user moves into an area that returns new Native Land API information.
+              </ThemedText>
+              <ThemedText>
+                Defend the Parks by mp3li is currently only available to early supporters who have
+                been provided an early access code directly from mp3li. If you have been provided the
+                code, enter it below.
+              </ThemedText>
+              <ThemedText type="defaultSemiBold">Access code:</ThemedText>
+              <TextInput
+                value={accessCodeInput}
+                onChangeText={(value) => {
+                  setAccessCodeInput(value);
+                  setAccessError('');
+                }}
+                onSubmitEditing={submitAccessCode}
+                autoCapitalize="characters"
+                autoCorrect={false}
+                secureTextEntry
+                accessibilityLabel="Access code"
+                style={styles.accessInput}
+              />
+              {accessError ? <ThemedText style={styles.accessError}>{accessError}</ThemedText> : null}
+              <AccessibleButton
+                label="Enter"
+                onPress={submitAccessCode}
+                variant="primary"
+                accessibilityHint="Submits the early access code"
+              />
+            </ThemedView>
+          </View>
+        </Modal>
         <ResponsiveContainer style={{ gap: padding, paddingTop: 0 }}>
         <ScrollView
           ref={scrollRef}
@@ -339,5 +421,34 @@ const styles = StyleSheet.create({
   imageCredit: {
     fontSize: 12,
     lineHeight: 16,
+  },
+  accessOverlay: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 18,
+    backgroundColor: 'rgba(4, 4, 12, 0.72)',
+  },
+  accessCard: {
+    width: '100%',
+    maxWidth: 560,
+    borderRadius: 12,
+    padding: 18,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: Colors.light.tint,
+  },
+  accessInput: {
+    minHeight: 48,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.light.icon,
+    backgroundColor: Colors.light.background,
+    color: Colors.light.text,
+    paddingHorizontal: 12,
+    fontSize: 18,
+  },
+  accessError: {
+    color: Colors.light.tint,
   },
 });
