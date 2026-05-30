@@ -1,4 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useFonts } from 'expo-font';
 import * as Linking from 'expo-linking';
 import { Stack, useRouter, type Href } from 'expo-router';
@@ -94,6 +95,7 @@ export default function RootLayout() {
     'LeagueSpartan-Bold': require('@/assets/fonts/LeagueSpartan-Bold.otf'),
     'Aileron-Regular': require('@/assets/fonts/Aileron-Regular.otf'),
     'Aileron-Italic': require('@/assets/fonts/Aileron-Italic.otf'),
+    ...MaterialIcons.font,
   });
 
   if (!fontsLoaded) {
