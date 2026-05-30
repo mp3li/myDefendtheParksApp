@@ -127,6 +127,7 @@ Collapsible section rules:
 - Use **Native Land Public Resources and Map Tools** for broader Native Land resource links.
 - Use **Nearby Sovereignties** for nearby contextual records.
 - Use **Journey Mode** for optional travel/background notifications.
+- Describe Journey Mode notifications as local notifications unless remote push infrastructure is actually added later.
 - Do not imply the app tracks users without opt-in.
 
 ## Permissions
@@ -136,6 +137,7 @@ Collapsible section rules:
 - Journey Mode must remain opt-in.
 - Notification and background permission requests should happen only when Journey Mode is enabled.
 - Background behavior should be described honestly as platform/runtime dependent.
+- Expo Go/browser limitations should be documented as testing/runtime limits, not as missing source implementation.
 - Web Journey Mode should be described as tab-open polling, not native background tracking.
 
 ## Web Deployment Rules
@@ -161,4 +163,4 @@ Collapsible section rules:
 - Keep requirement proof in `docs/FINAL_PROJECT_REQUIREMENTS.md`.
 - Keep implementation details in `docs/TECHNICAL_NOTES.md`.
 - Keep manual verification steps in `docs/TESTING_GUIDE.md`.
-- Add screenshots under `docs/screenshots/` using the placeholder filenames in README.
+- Add README screenshots under `docs/readme-assets/screenshots/`, with desktop web screenshots under `docs/readme-assets/screenshots/web/`.

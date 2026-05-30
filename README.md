@@ -25,7 +25,9 @@
 </p>
 
 <p align="center">
-  <img src="docs/readme-assets/gifs/defend-the-parks-app-flow.gif" alt="Defend the Parks app flow preview" width="360" />
+  <img src="docs/readme-assets/gifs/compare/app-flow-compare.gif" alt="Side-by-side app flow comparison: mobile and Expo on the left, desktop web on the right" width="920" />
+  <br />
+  <sub>Left: mobile / Expo app flow. Right: desktop web flow from the Cloudflare Pages deployment.</sub>
 </p>
 
 ## Table of Contents
@@ -155,11 +157,13 @@ The web build is an alternative review path for the assignment requirements, not
 The Homepage is the main guided entry point. It introduces the purpose of the app, explains that Defend the Parks uses National Park Service data and Native Land API data, opens the National Parks Picture Gallery, and shows the Featured Park of the Day with the same meaningful detail structure used on park pages. From the featured park, users can review Indigenous language, territory, treaty, placename, source, and map-tool records; read the National Park Service overview; open stewardship links; check activities, topics, weather, visitor information, fees, directions, and official park links; and save the park locally. Every major page also has the fixed compass **Jump To** menu, so long screens have a page-specific table of contents instead of forcing users to scroll blindly.
 
 <p align="center">
-  <img src="docs/readme-assets/gifs/home.gif" alt="Homepage flow showing welcome, gallery, featured park, Native Land context, visitor information, and quick actions" width="360" />
+  <img src="docs/readme-assets/gifs/compare/home-compare.gif" alt="Side-by-side Homepage comparison: mobile and Expo on the left, desktop web on the right" width="920" />
+  <br />
+  <sub>Left: mobile / Expo Homepage flow. Right: desktop web Homepage flow with expanded sections and landscape layout.</sub>
 </p>
 
 <details>
-<summary>Homepage screenshots used in this preview</summary>
+<summary>Mobile Homepage screenshots used in this preview</summary>
 
 <br />
 
@@ -176,16 +180,35 @@ The Homepage is the main guided entry point. It introduces the purpose of the ap
 
 </details>
 
+<details>
+<summary>Desktop web Homepage screenshots used in this preview</summary>
+
+<br />
+
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-home-welcome-gallery.png" alt="Desktop web Homepage welcome and gallery preview" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-home-featured-park.png" alt="Desktop web Featured Park of the Day with save button" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-home-placenames-overview.png" alt="Desktop web placename records, overview, and Get Involved section" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-home-languages-territories-treaties.png" alt="Desktop web languages, territories, and treaties returned for the featured park" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-home-resources-activities.png" alt="Desktop web Native Land public resources and activities" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-home-weather-visiting.png" alt="Desktop web weather and Visiting the Park section" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-home-fees-actions.png" alt="Desktop web fees, passes, and quick actions" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-gallery-expanded.png" alt="Desktop web expanded National Parks Picture Gallery" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-jump-to-menu.png" alt="Desktop web Jump To section menu" width="620" /></p>
+
+</details>
+
 ### 2. Search by State
 
 Search by State is for browsing National Park Service records geographically. Users search the state list, open a state page, review how many NPS-maintained locations were returned, and tap into a full profile page when they want the complete set of park data and Native Land context.
 
 <p align="center">
-  <img src="docs/readme-assets/gifs/search.gif" alt="Search by State flow with state list and state result pages" width="360" />
+  <img src="docs/readme-assets/gifs/compare/search-compare.gif" alt="Side-by-side Search by State comparison: mobile and Expo on the left, desktop web on the right" width="920" />
+  <br />
+  <sub>Left: mobile / Expo Search by State flow. Right: desktop web Search by State and state results.</sub>
 </p>
 
 <details>
-<summary>Search screenshots used in this preview</summary>
+<summary>Mobile Search screenshots used in this preview</summary>
 
 <br />
 
@@ -196,16 +219,30 @@ Search by State is for browsing National Park Service records geographically. Us
 
 </details>
 
+<details>
+<summary>Desktop web Search screenshots used in this preview</summary>
+
+<br />
+
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-search-by-state.png" alt="Desktop web Search by State screen" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-state-washington.png" alt="Desktop web Washington state result list" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-state-new-york.png" alt="Desktop web New York state result list" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-state-montana.png" alt="Desktop web Montana state result list" width="620" /></p>
+
+</details>
+
 ### 3. Where Are We? Mode
 
 Where Are We? is the current-location mode. After the user gives permission, the app gets exact coordinates, changes the button state so the user can see the coordinates were acquired, starts heading data for the in-app compass when available, calls Native Land API with the coordinates, and displays returned placenames, languages, territories, treaties, source links, public resources, and Nearby Sovereignties.
 
 <p align="center">
-  <img src="docs/readme-assets/gifs/where.gif" alt="Where Are We mode from intro to coordinates and Native Land results" width="360" />
+  <img src="docs/readme-assets/gifs/compare/where-compare.gif" alt="Side-by-side Where Are We comparison: mobile and Expo on the left, desktop web on the right" width="920" />
+  <br />
+  <sub>Left: mobile / Expo Where Are We? flow. Right: desktop web browser geolocation and expanded Native Land results.</sub>
 </p>
 
 <details>
-<summary>Where Are We screenshots used in this preview</summary>
+<summary>Mobile Where Are We screenshots used in this preview</summary>
 
 <br />
 
@@ -218,16 +255,30 @@ Where Are We? is the current-location mode. After the user gives permission, the
 
 </details>
 
+<details>
+<summary>Desktop web Where Are We screenshots used in this preview</summary>
+
+<br />
+
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-where-intro.png" alt="Desktop web Where Are We intro with Get My Coordinates button" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-where-coordinates-context.png" alt="Desktop web Where Are We coordinates and location context" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-where-records.png" alt="Desktop web placename, language, territory, and treaty records for current location" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-where-resources.png" alt="Desktop web Native Land resources, nearby sovereignties, and sources" width="620" /></p>
+
+</details>
+
 ### 4. Journey Mode
 
 Journey Mode is for road trips, moving through different areas, or any situation where the user wants updated context as they travel. The mode explains the permission model, starts from a deliberate **Begin Journey Mode** action, changes to **Stop Journey Mode** while active, and uses the same Native Land result structure as Where Are We? so users do not have to learn a second interface.
 
 <p align="center">
-  <img src="docs/readme-assets/gifs/journey.gif" alt="Journey Mode intro and current location result area" width="360" />
+  <img src="docs/readme-assets/gifs/compare/journey-compare.gif" alt="Side-by-side Journey Mode comparison: mobile and Expo on the left, desktop web on the right" width="920" />
+  <br />
+  <sub>Left: mobile / Expo Journey Mode flow. Right: desktop web Journey Mode with tab-open polling and current-location results.</sub>
 </p>
 
 <details>
-<summary>Journey Mode screenshots used in this preview</summary>
+<summary>Mobile Journey Mode screenshots used in this preview</summary>
 
 <br />
 
@@ -236,20 +287,42 @@ Journey Mode is for road trips, moving through different areas, or any situation
 
 </details>
 
+<details>
+<summary>Desktop web Journey Mode screenshots used in this preview</summary>
+
+<br />
+
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-journey-intro.png" alt="Desktop web Journey Mode intro and Begin Journey Mode button" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-journey-active.png" alt="Desktop web Journey Mode active state and Stop Journey Mode button" width="620" /></p>
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-journey-results.png" alt="Desktop web Journey Mode current location results" width="620" /></p>
+
+</details>
+
 ### 5. Save Parks
 
 Saved Parks keeps selected places available after the user leaves the screen. The saved list shows how many places are saved, displays each saved park name, and gives direct open and remove actions.
 
 <p align="center">
-  <img src="docs/readme-assets/gifs/saved.gif" alt="Saved Parks screen with saved locations and open or remove actions" width="360" />
+  <img src="docs/readme-assets/gifs/compare/saved-compare.gif" alt="Side-by-side Saved Parks comparison: mobile and Expo on the left, desktop web on the right" width="920" />
+  <br />
+  <sub>Left: mobile / Expo Saved Parks list. Right: desktop web Saved Parks list in the Cloudflare Pages layout.</sub>
 </p>
 
 <details>
-<summary>Saved Parks screenshot used in this preview</summary>
+<summary>Mobile Saved Parks screenshot used in this preview</summary>
 
 <br />
 
 <p align="center"><img src="docs/readme-assets/screenshots/raw-5362.png" alt="Saved Parks screen" width="300" /></p>
+
+</details>
+
+<details>
+<summary>Desktop web Saved Parks screenshot used in this preview</summary>
+
+<br />
+
+<p align="center"><img src="docs/readme-assets/screenshots/web/web-saved-parks.png" alt="Desktop web Saved Parks screen" width="620" /></p>
 
 </details>
 
@@ -285,7 +358,9 @@ The source code includes:
 - desktop/mobile web polling every 5 minutes while the browser tab is open;
 - shared result rendering with Where Are We?.
 
-Expo Go can show and test the foreground portions of this flow, but full background location and notification behavior is platform/build dependent. Because my available testing devices are in the Apple ecosystem and a paid Apple Developer account is a financial barrier, the final submission documents the native implementation locations and also deploys the app on Cloudflare Pages as an accessible web build. The web build demonstrates the GPS/API workflow and Journey Mode result updates while the tab remains open, but it does not claim to replace native app-store background location after the app is closed or backgrounded.
+In a native-capable runtime that grants the needed permissions, Journey Mode can start background location updates, compare the new Native Land context to the saved baseline, and schedule a local notification when the returned context changes. This is not remote server push notification infrastructure; it is local notification scheduling from the app through `expo-notifications`.
+
+Expo Go can show and test the foreground portions of this flow, but full background location and notification behavior is platform/build dependent. Because my available testing devices are in the Apple ecosystem and a paid Apple Developer account is a financial barrier, the final submission documents the native implementation locations and also deploys the app on Cloudflare Pages as an accessible web build. The web build demonstrates the GPS/API workflow and Journey Mode result updates while the tab remains open, but it does not claim to replace native app-store background location or local notifications after the app is closed or backgrounded.
 
 ## Feature: In-App Compass
 
@@ -457,14 +532,18 @@ The final project proof is documented in [`docs/FINAL_PROJECT_REQUIREMENTS.md`](
 
 High-level requirement coverage:
 
-| Requirement area | Where it is covered |
+| TXT requirement | Implementation proof |
 | --- | --- |
-| External APIs | NPS API and Native Land API data are consumed and displayed throughout the app |
-| Broadcast/system event behavior | AppState listener, deep-link route handling, and Journey Mode context-change state |
-| GPS/location feature | Where Are We? and Journey Mode |
-| Displayed API data | Home, Search, state pages, park pages, Where Are We?, Nearby Sovereignties, Journey Mode |
-| Persistence | Saved Parks and Journey Mode stored state |
-| Professional documentation | README and `/docs` folder |
+| Access the device's location | Where Are We? and Journey Mode request location permission and read GPS/network coordinates through `expo-location`. |
+| Process location data responsibly | The app explains why location is needed, only requests it after user action, displays coordinates to the user, treats Native Land records as contextual rather than legal boundaries, and keeps Journey Mode opt-in. |
+| Use a background service such as location updates, notifications, or scheduled tasks | Journey Mode includes background location task registration through `expo-task-manager`/`expo-location`, local notification scheduling through `expo-notifications`, and web tab-open polling for browser review. |
+| Listen for at least one broadcast event, system event, or custom event | The app listens to React Native `AppState`, handles deep links, and stores Journey Mode context-change events. |
+| Consume data from an external API | The app consumes the National Park Service API and Native Land API. |
+| Display retrieved data in the interface | NPS and Native Land records are displayed on Home, Search, state pages, park pages, Where Are We?, Nearby Sovereignties, Journey Mode, and Saved Parks where applicable. |
+| Include at least one animated UI element or screen transition | Where Are We? includes an animated spinning compass while getting coordinates; the app also uses fade modal transitions and heading-driven compass rotation. |
+| Clearly structured layout and navigation | The app includes fixed title/header, mobile bottom tabs, desktop web header nav, Back strip, Return to Homepage, Jump To menu, and sectioned content. |
+| User interaction through buttons, inputs, or gestures | Users can search states, open parks, save/remove parks, open gallery images, use Jump To, get coordinates, begin/stop Journey Mode, and refresh location results. |
+| Deliver source code by GitHub link and brief README | The repo includes source code, this README, requirement proof, testing guide, technical notes, style rules, and a source-available license. |
 
 ## Documentation Map
 
@@ -481,6 +560,6 @@ Defend the Parks by mp3li is source-available for educational review, instructor
 
 ## Screenshots and Credits
 
-The top README GIF is built from all 23 iPhone screenshots captured during app testing. Feature GIFs are grouped by Homepage, Search, Where Are We?, Journey Mode, Saved Parks, and Jump To flows. Static README screenshots are copied into `docs/readme-assets/screenshots/` with descriptive filenames.
+The README preview GIFs are built as side-by-side comparisons from selected mobile/Expo screenshots and matching desktop web screenshots. Feature GIFs are grouped by Homepage, Search, Where Are We?, Journey Mode, Saved Parks, and Jump To flows. Static README screenshots are copied into `docs/readme-assets/screenshots/` with descriptive filenames, with desktop web screenshots under `docs/readme-assets/screenshots/web/`.
 
 Park images and photo credits shown inside the app come from National Park Service API records. App background images are credited above for Maria Orlova, Evan Wise, Denise Jans, and Kyle Loftus on Unsplash.

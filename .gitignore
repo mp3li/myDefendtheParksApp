@@ -4,3 +4,13 @@ learning-react-native-app/.env
 learning-react-native-app/.expo/
 learning-react-native-app/dist/
 learning-react-native-app/node_modules/
+
+# Local screenshot sources and intermediate README GIFs
+/Screenshots/
+docs/readme-assets/gifs/defend-the-parks-app-flow.gif
+docs/readme-assets/gifs/home.gif
+docs/readme-assets/gifs/journey.gif
+docs/readme-assets/gifs/saved.gif
+docs/readme-assets/gifs/search.gif
+docs/readme-assets/gifs/where.gif
+docs/readme-assets/gifs/web/

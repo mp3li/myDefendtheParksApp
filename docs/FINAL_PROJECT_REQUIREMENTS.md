@@ -2,6 +2,25 @@
 
 This document maps the DATA 144 / Mobile Application Development final project requirements to the implemented Defend the Parks by mp3li source code.
 
+## Requirement Summary From TXT
+
+All required items from `[Final Project - Mobile Application Development.txt].txt` are addressed:
+
+| TXT requirement | Status | Implementation proof |
+| --- | --- | --- |
+| Access the device's location | Met | Where Are We? and Journey Mode request foreground location permission and read coordinates with `expo-location`. |
+| Process location data responsibly | Met | Location is requested only after user action, coordinates are displayed back to the user, Native Land records are described as contextual and not legal boundaries, and Journey Mode remains opt-in. |
+| Use a background service such as location updates, notifications, or scheduled tasks | Met in source; runtime verification is platform dependent | Journey Mode registers a background location task with `expo-task-manager`/`expo-location`, requests notification/background permissions when enabled, schedules local notifications through `expo-notifications` when returned context changes, and uses 5-minute tab-open polling on web. |
+| Listen for at least one broadcast event, system event, or custom event | Met | React Native `AppState` listens for lifecycle events, deep links are handled in the root layout, and Journey Mode stores a custom context-change event. |
+| Consume data from an external API | Met | National Park Service API and Native Land API are consumed. |
+| Display retrieved data in the application interface | Met | Retrieved NPS and Native Land records display across Home, Search, state pages, park pages, Where Are We?, Nearby Sovereignties, and Journey Mode. |
+| Include at least one animated UI element or screen transition | Met | Where Are We? uses an animated spinning compass while getting coordinates; the app also uses fade modal transitions and heading-driven compass rotation. |
+| Clearly structured layout and navigation | Met | Fixed title/header, mobile tabs, desktop web nav, Back strip, Return to Homepage, Jump To menu, and sectioned content. |
+| User interaction through buttons, inputs, or gestures | Met | State search, park open/save/remove actions, gallery modal, Jump To, Get My Coordinates, Begin/Stop Journey Mode, and refreshable coordinate button. |
+| Completed mobile application | Met | Expo React Native app lives in `learning-react-native-app/`. |
+| Source code submitted by GitHub link | Met | Source is maintained in the GitHub repo. |
+| Brief written description of application features | Met | `README.md` and `/docs` provide feature and requirement documentation. |
+
 ## Requirement 1: Location and Background Services
 
 Implemented through **Where Are We?** and **Journey Mode**.
@@ -21,7 +40,8 @@ What is implemented:
 - Updates Journey Mode last-check time during foreground Journey Mode checks.
 - Registers a background location task in source code with `expo-task-manager`.
 - Compares new returned territory context to the saved baseline when background updates are available.
-- Schedules a local notification when Journey Mode detects changed returned context.
+- Schedules a local notification with `expo-notifications` when Journey Mode detects changed returned context.
+- This is local notification scheduling, not remote server push notification infrastructure.
 - On desktop web and mobile web, checks for updated Journey Mode coordinate context every 5 minutes while the browser tab remains open.
 
 Implementation locations:
@@ -32,6 +52,12 @@ Implementation locations:
 - `learning-react-native-app/services/location-context.ts`
 - `learning-react-native-app/services/journey-mode.ts`
 - `learning-react-native-app/tasks/journey-mode-task.ts`
+
+Notification/background source proof:
+
+- `learning-react-native-app/services/journey-mode.ts` lazy-loads `expo-notifications`, requests notification permission, requests background location permission when available, starts `Location.startLocationUpdatesAsync`, and calls `Notifications.scheduleNotificationAsync` when the saved context changes.
+- `learning-react-native-app/tasks/journey-mode-task.ts` defines the background location task and passes updated coordinates into `processJourneyModeLocation`.
+- Expo Go and browser web previews can demonstrate the foreground Journey Mode flow, but native background location and local notification delivery depend on runtime, permissions, and operating-system support.
 
 ## Requirement 2: Broadcast Intents and External APIs
 
@@ -62,7 +88,7 @@ Implementation locations:
 - `functions/api/nps/[[path]].js`
 - `functions/api/access-code.js`
 
-## Requirement 3: Display Retrieved API Data
+## Requirement 2 Continued: Display Retrieved API Data
 
 External API data is displayed throughout the interface.
 
@@ -109,7 +135,7 @@ Implementation locations:
 - `learning-react-native-app/components/park/park-detail-content.tsx`
 - `learning-react-native-app/constants/native-land-resources.ts`
 
-## Requirement 4: User Interface and Animation
+## Requirement 3: User Interface and Animation
 
 What is implemented:
 
@@ -130,6 +156,12 @@ What is implemented:
 - Glassy/dimmed background image system.
 - Theme-aware typography and colors.
 - Flat glass section styling without nested solid white subcards.
+
+Animation proof:
+
+- `learning-react-native-app/app/(tabs)/where-are-we.tsx` defines `LoadingCompass`, which uses React Native `Animated.loop` and `Animated.timing` to rotate the compass from `0deg` to `360deg` while showing `Getting your coordinates...`.
+- `learning-react-native-app/components/app-header.tsx`, `learning-react-native-app/components/park/national-parks-picture-gallery.tsx`, and `learning-react-native-app/app/(tabs)/index.tsx` also use `Modal` fade transitions.
+- Where Are We? and Journey Mode rotate the in-app compass when heading/tilting data is available.
 
 Implementation locations:
 

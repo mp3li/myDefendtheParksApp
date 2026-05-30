@@ -144,6 +144,8 @@ When turned on:
 - an updating loading state appears while Journey Mode is getting current or refreshed coordinate context.
 - desktop web and mobile web builds check for updated Journey Mode coordinates every 5 minutes only while the tab remains open.
 
+In native-capable runtimes, the background path is implemented as source code rather than as Expo Go-only behavior. `services/journey-mode.ts` starts background location updates, `tasks/journey-mode-task.ts` receives updated coordinates, and `processJourneyModeLocation` compares the returned Native Land context to the saved baseline. If the returned context changes, the service stores a Journey Mode event and schedules a local notification.
+
 Implementation locations:
 
 - `learning-react-native-app/components/journey-mode-panel.tsx`
@@ -164,7 +166,7 @@ Notifications use `expo-notifications`.
 The app schedules local notifications only for Journey Mode context changes. Notification permission is requested only when the user turns Journey Mode on.
 The notification module is lazy-loaded by the Journey Mode service so normal app startup does not import notification behavior before the user needs it.
 
-Expo Go may warn that full notification support is limited. The source implementation remains present for review and for future native app-store runtimes.
+This is local notification behavior, not remote push notification infrastructure from a backend server. Expo Go may warn that full notification support is limited. The source implementation remains present for review and for future native app-store runtimes.
 
 ## Broadcast, System Events, and Deep Links
 

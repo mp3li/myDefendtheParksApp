@@ -133,7 +133,7 @@ Check:
 - in-app compass heading updates when device/browser heading data is available;
 - How Journey Mode Works panel has a readable glass background;
 - notification/background permission prompts appear when the runtime supports them;
-- notification behavior is not imported until Journey Mode notification permissions or scheduling are needed;
+- notification behavior is not imported until Journey Mode notification permissions or local notification scheduling are needed;
 - Last update displays `Journey Mode not yet enabled` before Journey Mode starts;
 - Last update changes after Journey Mode starts;
 - current location result sections display after coordinates are loaded;
@@ -142,12 +142,12 @@ Check:
 Expo Go note:
 
 - visible Journey Mode UI and foreground coordinate behavior can be tested in Expo;
-- full background-location and notification behavior is implemented in source but may not fully run inside Expo Go on iPhone.
+- full background-location and local notification behavior is implemented in source but may not fully run inside Expo Go on iPhone.
 
 Web note:
 
 - desktop web and mobile web can show Journey Mode foreground results while the browser tab is open;
-- desktop web and mobile web are not equivalent to native background location after the app is closed or backgrounded;
+- desktop web and mobile web are not equivalent to native background location or local notification delivery after the app is closed or backgrounded;
 - the web build uses a 5-minute tab-open polling path to provide an accessible demonstration of the travel-aware workflow.
 
 ## Navigation
@@ -203,6 +203,12 @@ For source review, inspect:
 - `learning-react-native-app/app/(tabs)/journey-mode.tsx`
 
 Because the available physical testing devices are in the Apple ecosystem and Apple Developer account access creates a financial barrier, this submission documents the native implementation source and provides a Cloudflare Pages deployment for accessible browser-based testing. The web deployment demonstrates foreground GPS lookup, API display, Journey Mode start/stop behavior, current-location results, and tab-open polling while keeping native background-location source available for review.
+
+Notification source review:
+
+- `learning-react-native-app/services/journey-mode.ts` requests notification permission through `expo-notifications`.
+- `learning-react-native-app/services/journey-mode.ts` schedules a local notification with `Notifications.scheduleNotificationAsync` when Journey Mode detects changed returned context.
+- This is local notification scheduling, not remote server push notification infrastructure.
 
 ## Deployed Web Behavior
 
