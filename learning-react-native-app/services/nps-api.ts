@@ -2,6 +2,7 @@ import { US_STATES } from '@/constants/us-states';
 import type { NpsPark, ParkOfTheDay } from '@/types/parks';
 
 const NPS_API_BASE_URL = 'https://developer.nps.gov/api/v1';
+const NPS_WEB_PROXY_BASE_URL = '/api/nps';
 const NPS_API_KEY = process.env.EXPO_PUBLIC_NPS_API_KEY ?? '';
 const PARK_FIELDS = [
   'images',
@@ -20,24 +21,50 @@ type NpsParksResponse = {
   data: NpsPark[];
 };
 
+function shouldUseNpsWebProxy() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const hostname = window.location.hostname;
+  return (
+    hostname.endsWith('.pages.dev') ||
+    hostname === 'defendtheparks.mp3li.online' ||
+    hostname.endsWith('.mp3li.online')
+  );
+}
+
 function buildNpsUrl(path: string, params: Record<string, string>) {
-  const url = new URL(`${NPS_API_BASE_URL}${path}`);
+  const useWebProxy = shouldUseNpsWebProxy();
+  const url = useWebProxy
+    ? new URL(`${NPS_WEB_PROXY_BASE_URL}${path}`, window.location.origin)
+    : new URL(`${NPS_API_BASE_URL}${path}`);
+
   Object.entries(params).forEach(([key, value]) => {
     url.searchParams.set(key, value);
   });
-  // Keep query-key fallback for compatibility with older API behavior.
-  url.searchParams.set('api_key', NPS_API_KEY);
+
+  if (!useWebProxy) {
+    // Keep query-key fallback for compatibility with older API behavior.
+    url.searchParams.set('api_key', NPS_API_KEY);
+  }
+
   return url;
 }
 
 async function requestNps(path: string, params: Record<string, string>) {
   const url = buildNpsUrl(path, params);
+  const useWebProxy = shouldUseNpsWebProxy();
 
   const response = await fetch(url.toString(), {
-    headers: {
-      'X-Api-Key': NPS_API_KEY,
-      Accept: 'application/json',
-    },
+    headers: useWebProxy
+      ? {
+          Accept: 'application/json',
+        }
+      : {
+          'X-Api-Key': NPS_API_KEY,
+          Accept: 'application/json',
+        },
   });
 
   if (!response.ok) {
