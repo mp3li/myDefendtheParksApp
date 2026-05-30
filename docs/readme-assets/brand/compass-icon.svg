@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Defend the Parks compass icon</title>
+  <desc id="desc">The same compass mark used in the app header: dark circle, orange rim, faint crosshairs, orange needle, and ivory tail.</desc>
+  <defs>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#aa5215" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <circle cx="64" cy="64" r="55" fill="#04040c" stroke="#aa5215" stroke-width="7" filter="url(#glow)"/>
+  <rect x="62.5" y="21" width="3" height="86" rx="1.5" fill="#f7efe2" opacity="0.35"/>
+  <rect x="21" y="62.5" width="86" height="3" rx="1.5" fill="#f7efe2" opacity="0.35"/>
+  <path d="M64 25 L74 68 H54 Z" fill="#aa5215"/>
+  <path d="M64 103 L56 70 H72 Z" fill="#edd9b7"/>
+</svg>

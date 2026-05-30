@@ -71,6 +71,7 @@ Rules:
 - Use the Maria Orlova image for the main app background.
 - Use `evan-wise-2wvXI4mjYJ8-unsplash` for Where Are We?.
 - Use `evan-wise-mNSSpeJsnQA-unsplash` for Journey Mode.
+- Use the shared in-app compass visual style on Where Are We?, Journey Mode, and the Jump To button: night face, campfire border, faint ivory crosshairs, campfire upper needle, and ivory lower needle.
 - Backgrounds should stay dimmed/glassy enough for text readability.
 - Use shared glass surface styles from `components/screen-background.tsx`.
 - Avoid section backgrounds that visually merge into the nav bars.
@@ -108,7 +109,7 @@ Collapsible section rules:
 
 - Use plain, respectful language.
 - Say records are "returned" or "connected to this location/profile" instead of claiming legal certainty.
-- When discussing NPS results broadly, say "national parks and other locations serviced by the National Park Service, like historic sites, trails, memorials, battlefields, and monuments."
+- When discussing NPS results broadly, say "National Parks and other locations maintained by the National Park Service, like historic sites, trails, memorials, battlefields, and monuments."
 - Mention that Indigenous territories can overlap.
 - Center language records first when Native Land returns them.
 - Include territories and treaties when returned.

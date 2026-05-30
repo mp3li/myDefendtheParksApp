@@ -1,6 +1,6 @@
 # Final Project Requirements
 
-This document maps the Mobile Application Development final project requirements to the implemented Defend the Parks by mp3li source code.
+This document maps the DATA 144 / Mobile Application Development final project requirements to the implemented Defend the Parks by mp3li source code.
 
 ## Requirement 1: Location and Background Services
 
@@ -14,6 +14,7 @@ What is implemented:
 - Uses those coordinates to request Native Land API records.
 - Starts heading updates when location permission is available.
 - Displays an in-app compass when heading data is available.
+- Displays the in-app compass on Where Are We? and Journey Mode.
 - Provides Journey Mode as an opt-in travel feature started by the **Begin Journey Mode** button.
 - Displays Journey Mode current-location results with the same result structure used by Where Are We?.
 - Stores Journey Mode enabled state, last check time, baseline context, and last context-change event with AsyncStorage.
@@ -62,7 +63,7 @@ External API data is displayed throughout the interface.
 NPS API data displayed:
 
 - Featured Park of the Day.
-- State lists of national parks and other locations serviced by the National Park Service.
+- State lists of national parks and other locations maintained by the National Park Service, including historic sites, trails, memorials, battlefields, monuments, and other NPS designations returned by the API.
 - Profile overview.
 - Park images.
 - Activities and topics.
@@ -143,7 +144,7 @@ Use this checklist for grading:
 - Confirm the save/remove park button persists saved state.
 - Open Search and search/select a state.
 - Open a profile and review API content sections.
-- Confirm state pages explain that results include national parks and other locations serviced by the National Park Service.
+- Confirm state pages explain that results include national parks and other locations maintained by the National Park Service.
 - Confirm the National Parks Picture Gallery uses the same section styling as the rest of the app and opens full-size images.
 - Confirm Native Land records or empty/failure messages display on profiles.
 - Open Where Are We?.
@@ -158,20 +159,25 @@ Use this checklist for grading:
 - Confirm the in-app compass copy says `Get your Coordinates to use the in-app compass.` before heading data is available.
 - Open Journey Mode.
 - Tap **Begin Journey Mode**.
+- Confirm the Journey Mode in-app compass appears above How Journey Mode Works.
 - Confirm Journey Mode state persists after navigating away and returning.
 - Confirm Journey Mode displays current location results with the same general structure as Where Are We? after coordinates load.
 - Review `tasks/journey-mode-task.ts` for background task source.
 - Review `app/_layout.tsx` for deep-link handling.
 - Review `where-are-we.tsx` for AppState lifecycle handling.
 
-## Testing Caveat
+## Testing, Expo Go, and Development Build Plan
 
-The course TXT does not require a development build. This repo includes the background-location implementation in source code, but full background-location runtime behavior can depend on:
+Testing so far has been done primarily on iPhone through Expo. That workflow supports review of the app shell, navigation, API data display, foreground Where Are We? coordinate lookup, heading/compass behavior when available, Saved Parks, Jump To, and the visible Journey Mode screen flow.
+
+The repo includes the Journey Mode background-location and notification implementation in source code, but full background-location runtime behavior can depend on:
 
 - Expo Go versus native build runtime;
 - platform permissions;
 - operating system background-location rules;
 - notification permission choices;
 - whether the operating system allows background updates at that moment.
+
+For instructor grading, the source implementation is available for review in GitHub, and a development build can be provided so Journey Mode background behavior can be tested outside Expo Go when the instructor needs runtime verification of the native behavior.
 
 Foreground location lookup, external API display, UI animation, AppState handling, deep-link source, local persistence, and source-level Journey Mode implementation are all available for review through the standard GitHub and Expo workflow.

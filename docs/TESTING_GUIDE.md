@@ -12,7 +12,7 @@ npm install
 npx expo start --clear
 ```
 
-Open the app in Expo Go, iOS Simulator, Android Emulator, or web preview.
+Open the app in Expo Go, iOS Simulator, Android Emulator, or web preview. Current hands-on testing has been focused on iPhone through Expo.
 
 ## Static Checks
 
@@ -30,12 +30,7 @@ Expected result:
 
 ## API Key Check
 
-The app expects these environment variables in `learning-react-native-app/.env`:
-
-```bash
-EXPO_PUBLIC_NPS_API_KEY=your_nps_key_here
-EXPO_PUBLIC_NATIVE_LAND_API_KEY=your_native_land_key_here
-```
+The app expects National Park Service and Native Land API variables in `learning-react-native-app/.env`. The variable names are defined in the API service files and real values should not be committed.
 
 If keys are missing or invalid, API areas may show error or empty-state messages instead of records.
 
@@ -109,11 +104,18 @@ Check:
 - Journey Mode tab opens directly from the bottom navigation;
 - intro card uses the same header styling as other screens;
 - **Begin Journey Mode** starts the Journey Mode permission/location flow;
+- In-App Compass appears above How Journey Mode Works;
+- in-app compass heading updates when device/browser heading data is available;
 - How Journey Mode Works panel has a readable glass background;
 - notification/background permission prompts appear when the runtime supports them;
 - notification behavior is not imported until Journey Mode notification permissions or scheduling are needed;
 - Last update displays `Journey Mode not yet enabled` before Journey Mode starts;
 - current location result sections display after coordinates are loaded.
+
+Expo Go note:
+
+- visible Journey Mode UI and foreground coordinate behavior can be tested in Expo;
+- full background-location and notification behavior may require a native development build for instructor runtime testing.
 
 ## Navigation
 
@@ -147,7 +149,7 @@ Implementation location:
 
 Runtime behavior can depend on the preview environment.
 
-## Background Behavior Caveat
+## Background Behavior and Development Build Caveat
 
 Journey Mode background-location behavior is implemented in source code, but full runtime verification may depend on:
 
@@ -162,3 +164,5 @@ For source review, inspect:
 - `learning-react-native-app/services/journey-mode.ts`
 - `learning-react-native-app/tasks/journey-mode-task.ts`
 - `learning-react-native-app/components/journey-mode-panel.tsx`
+
+For final grading, a development build can be provided if the instructor needs to test Journey Mode's native background-location and notification behavior outside Expo Go.

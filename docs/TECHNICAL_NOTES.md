@@ -80,6 +80,22 @@ Implementation location:
 
 - `learning-react-native-app/services/location-context.ts`
 
+## In-App Compass
+
+The in-app compass appears on Where Are We? and Journey Mode.
+
+The compass is built from React Native views:
+
+- dark circular face;
+- campfire-orange border;
+- faint ivory vertical and horizontal crosshairs;
+- orange upper needle;
+- ivory lower needle.
+
+It uses `expo-location` heading updates through `Location.watchHeadingAsync`. When heading data is available, the app rotates the compass by the inverse of the device heading so the needle points north.
+
+The compass does not require NPS API or Native Land API network data. It can work without API responses if the app is already running and the device or browser provides heading sensor data. Availability still depends on platform permissions, hardware sensors, and browser/device behavior.
+
 ## Journey Mode
 
 Journey Mode is opt-in. In the current UI, the **Begin Journey Mode** button starts the Journey Mode permission and location flow.
@@ -144,7 +160,7 @@ The Search by State list uses memoized rows and FlatList render-window settings 
 
 ## National Park Service Scope
 
-The app includes national parks and other locations serviced by the National Park Service, like historic sites, trails, memorials, battlefields, and monuments.
+The app includes National Parks and other locations maintained by the National Park Service, like historic sites, trails, memorials, battlefields, and monuments.
 
 This wording is intentional because the NPS API returns multiple designation types. Future iterations are planned to include filters so users can learn about these places and their Indigenous history by designation.
 
@@ -165,7 +181,7 @@ Palette:
 
 ## Platform Caveat
 
-The course TXT does not require a development build. The standard Expo source workflow is enough for foreground testing and source review.
+Testing has been focused on iPhone through the Expo workflow. The standard Expo source workflow is enough for foreground testing and source review of navigation, API data display, Where Are We?, Saved Parks, AppState handling, deep-link source, and visible Journey Mode UI.
 
 Full background-location runtime verification can depend on:
 
@@ -175,4 +191,18 @@ Full background-location runtime verification can depend on:
 - notification permission state;
 - whether the device allows background updates during the test.
 
-For grading, the source implementation locations are documented in `docs/FINAL_PROJECT_REQUIREMENTS.md`.
+For grading, the source implementation locations are documented in `docs/FINAL_PROJECT_REQUIREMENTS.md`. A development build can be provided when the instructor needs runtime verification of Journey Mode background location and notification behavior outside Expo Go.
+
+## Future Web Deployment
+
+The current app does not have a backend. A future web version can be built from Expo and hosted as a static app on Cloudflare Pages, with the client calling NPS and Native Land directly.
+
+A backend is not required for the current app to function, but a later backend running on a local iMac or hosted server would be useful for:
+
+- protecting API keys;
+- caching API responses;
+- normalizing NPS and Native Land records;
+- reducing duplicate requests;
+- preparing a more public production deployment.
+
+Where Are We? can map to browser geolocation with user permission. Journey Mode can also show current foreground results on web while the browser tab is open. Native background travel updates and local notifications after the app is backgrounded or closed should not be treated as equivalent to the static Cloudflare Pages web version.

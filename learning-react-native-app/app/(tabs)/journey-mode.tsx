@@ -1,7 +1,7 @@
 import * as Location from 'expo-location';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AccessibleButton } from '@/components/accessible-button';
@@ -15,9 +15,18 @@ import { Palette } from '@/constants/theme';
 import { useAppStateContext } from '@/context/app-state-context';
 import { usePageSections } from '@/context/page-sections-context';
 import { useResponsiveLayout } from '@/hooks/use-responsive-layout';
-import { requestJourneyModePermissions, setJourneyModeBaseline, setJourneyModeEnabled, startJourneyModeTask } from '@/services/journey-mode';
+import {
+  requestJourneyModePermissions,
+  setJourneyModeBaseline,
+  setJourneyModeEnabled,
+  startJourneyModeTask,
+} from '@/services/journey-mode';
 import { fetchLocationContext, fetchNearbySovereignties } from '@/services/location-context';
 import type { IndigenousContextData, NearbySovereignty } from '@/types/parks';
+
+type LoadJourneyLocationOptions = {
+  silent?: boolean;
+};
 
 function formatCoordinate(value: number) {
   return value.toFixed(5);
@@ -37,6 +46,28 @@ function BulletList({ items, emptyText }: { items: string[]; emptyText: string }
   );
 }
 
+function HeadingCompass({ heading }: { heading: number | null }) {
+  const rotation = heading == null ? '0deg' : `${-heading}deg`;
+
+  return (
+    <View style={styles.headingCompassBlock}>
+      <View style={[styles.headingCompass, { transform: [{ rotate: rotation }] }]}>
+        <View style={styles.compassCrossVertical} />
+        <View style={styles.compassCrossHorizontal} />
+        <View style={styles.headingNeedle} />
+        <View style={styles.headingNeedleTail} />
+      </View>
+      <View style={styles.headingTextBlock}>
+        <ThemedText>
+          {heading == null
+            ? 'Begin Journey Mode to use the in-app compass.'
+            : `Device heading: ${Math.round(heading)} degrees`}
+        </ThemedText>
+      </View>
+    </View>
+  );
+}
+
 export default function JourneyModeScreen() {
   const { reportError, showSnackbar } = useAppStateContext();
   const { setJumpHandler, setSections } = usePageSections();
@@ -49,11 +80,37 @@ export default function JourneyModeScreen() {
   const [nearby, setNearby] = useState<NearbySovereignty[]>([]);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [permissionMessage, setPermissionMessage] = useState('');
+  const [heading, setHeading] = useState<number | null>(null);
+  const headingSubscriptionRef = useRef<Location.LocationSubscription | null>(null);
+
+  const startHeadingWatch = useCallback(async () => {
+    if (headingSubscriptionRef.current) {
+      return;
+    }
+
+    try {
+      headingSubscriptionRef.current = await Location.watchHeadingAsync((headingData) => {
+        const nextHeading =
+          headingData.trueHeading >= 0 ? headingData.trueHeading : headingData.magHeading;
+        setHeading(Number.isFinite(nextHeading) ? nextHeading : null);
+      });
+    } catch {
+      setHeading(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      headingSubscriptionRef.current?.remove();
+      headingSubscriptionRef.current = null;
+    };
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
       setSections([
         { id: 'overview', label: 'Overview' },
+        { id: 'compass', label: 'In-App Compass' },
         { id: 'journey', label: 'How Journey Mode Works' },
         { id: 'results', label: 'Current Location Results' },
       ]);
@@ -68,16 +125,20 @@ export default function JourneyModeScreen() {
     }, [setJumpHandler, setSections])
   );
 
-  const loadJourneyLocation = useCallback(async () => {
+  const loadJourneyLocation = useCallback(async (options: LoadJourneyLocationOptions = {}) => {
     try {
-      setLoadingLocation(true);
-      setPermissionMessage('');
+      if (!options.silent) {
+        setLoadingLocation(true);
+        setPermissionMessage('');
+      }
       const permission = await Location.requestForegroundPermissionsAsync();
       if (!permission.granted) {
         setPermissionMessage('Location permission is needed to get Journey Mode coordinates.');
         return;
       }
-      await requestJourneyModePermissions();
+      if (!options.silent) {
+        await requestJourneyModePermissions();
+      }
 
       const nextLocation = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
@@ -87,6 +148,7 @@ export default function JourneyModeScreen() {
         longitude: nextLocation.coords.longitude,
       };
       setCoordinate(nextCoordinate);
+      await startHeadingWatch();
       const nextContext = await fetchLocationContext(nextCoordinate.latitude, nextCoordinate.longitude);
       setContext(nextContext);
       await setJourneyModeBaseline(nextContext);
@@ -97,13 +159,31 @@ export default function JourneyModeScreen() {
         setPermissionMessage('Journey Mode is enabled, but background updates may be limited in this runtime.');
       }
       setNearby(await fetchNearbySovereignties(nextCoordinate.latitude, nextCoordinate.longitude, nextContext));
-      showSnackbar('Journey Mode location context updated.', 'info');
+      if (!options.silent) {
+        showSnackbar('Journey Mode location context updated.', 'info');
+      }
     } catch (error) {
       reportError(error, 'Unable to load Journey Mode location context.');
     } finally {
-      setLoadingLocation(false);
+      if (!options.silent) {
+        setLoadingLocation(false);
+      }
     }
-  }, [reportError, showSnackbar]);
+  }, [reportError, showSnackbar, startHeadingWatch]);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !coordinate) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      void loadJourneyLocation({ silent: true });
+    }, 5 * 60 * 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [coordinate, loadJourneyLocation]);
 
   const languages = context?.languages ?? [];
   const territories = context?.territories ?? [];
@@ -150,6 +230,19 @@ export default function JourneyModeScreen() {
                 Coordinates: {formatCoordinate(coordinate.latitude)}, {formatCoordinate(coordinate.longitude)}
               </ThemedText>
             ) : null}
+          </ThemedView>
+
+          <ThemedView
+            style={[styles.noteCard, glassSurfaceStyle]}
+            onLayout={(event) => {
+              sectionOffsets.current.compass = event.nativeEvent.layout.y;
+            }}>
+            <ThemedText type="subtitle">In-App Compass</ThemedText>
+            <HeadingCompass heading={heading} />
+            <ThemedText>
+              Journey Mode uses the same in-app compass style as Where Are We? when device heading
+              data is available.
+            </ThemedText>
           </ThemedView>
 
           <ThemedView
@@ -229,5 +322,60 @@ const styles = StyleSheet.create({
   resultsStack: {
     gap: 10,
     backgroundColor: 'transparent',
+  },
+  headingCompassBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headingCompass: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    borderWidth: 2,
+    borderColor: Palette.campfire,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Palette.night,
+  },
+  compassCrossVertical: {
+    position: 'absolute',
+    width: 1,
+    height: '78%',
+    backgroundColor: 'rgba(247, 239, 226, 0.35)',
+  },
+  compassCrossHorizontal: {
+    position: 'absolute',
+    width: '78%',
+    height: 1,
+    backgroundColor: 'rgba(247, 239, 226, 0.35)',
+  },
+  headingNeedle: {
+    position: 'absolute',
+    top: 9,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderBottomWidth: 22,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: Palette.campfire,
+  },
+  headingNeedleTail: {
+    position: 'absolute',
+    bottom: 10,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderTopWidth: 16,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: Palette.yosemiteIvory,
+  },
+  headingTextBlock: {
+    flex: 1,
+    gap: 2,
   },
 });
