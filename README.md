@@ -24,6 +24,12 @@
 </p>
 
 <p align="center">
+  <img alt="Access" src="https://img.shields.io/badge/Access-Early_Access_Only-aa5215?style=for-the-badge&labelColor=04040c" />
+  <img alt="Status" src="https://img.shields.io/badge/Status-In_Active_Development-66310c?style=for-the-badge&labelColor=04040c" />
+  <img alt="License" src="https://img.shields.io/badge/License-Source_Available_Review_Only-151e08?style=for-the-badge&labelColor=04040c" />
+</p>
+
+<p align="center">
   <img src="docs/readme-assets/gifs/defend-the-parks-app-flow.gif" alt="Defend the Parks app flow preview" width="360" />
 </p>
 
@@ -50,6 +56,7 @@
 - [Future Deployment Direction](#future-deployment-direction)
 - [Final Project Requirement Map](#final-project-requirement-map)
 - [Documentation Map](#documentation-map)
+- [License](#license)
 - [Screenshots and Credits](#screenshots-and-credits)
 
 </details>
@@ -396,6 +403,10 @@ High-level requirement coverage:
 | [`docs/TECHNICAL_NOTES.md`](docs/TECHNICAL_NOTES.md) | Location, API, Journey Mode, notification, platform, and future deployment notes |
 | [`docs/STYLE_RULES.md`](docs/STYLE_RULES.md) | App palette, typography, layout, copy tone, section styling, and asset rules |
 | [`docs/TESTING_GUIDE.md`](docs/TESTING_GUIDE.md) | Manual test path for Expo/iPhone and grading review |
+
+## License
+
+Defend the Parks by mp3li is source-available for educational review, instructor evaluation, and early-access review only. It is not open source. Viewing and running the code locally for review is allowed with your own API keys, but copying, forking, redistributing, modifying, publishing, selling, or reusing the project without prior written permission from mp3li is not allowed. See [`LICENSE`](LICENSE).
 
 ## Screenshots and Credits
 

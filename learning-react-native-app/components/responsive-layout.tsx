@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewProps } from 'react-native';
+import { Platform, View, StyleSheet, ViewProps } from 'react-native';
 import { useResponsiveLayout } from '@/hooks/use-responsive-layout';
 
 interface ResponsiveContainerProps extends ViewProps {
@@ -20,7 +20,8 @@ export function ResponsiveContainer({ style, children, ...props }: ResponsiveCon
       paddingTop: padding,
       paddingBottom: 0,
     },
-    isTablet && { maxWidth: screenWidth * 0.9 },
+    Platform.OS === 'web' && styles.webFullWidth,
+    isTablet && Platform.OS !== 'web' && { maxWidth: screenWidth * 0.9 },
     style,
   ];
 
@@ -122,6 +123,10 @@ export function GridLayout({ children, columnCount, gap = 8 }: GridLayoutProps) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  webFullWidth: {
+    width: '100%',
+    alignSelf: 'stretch',
   },
   masterDetailContainer: {
     flex: 1,

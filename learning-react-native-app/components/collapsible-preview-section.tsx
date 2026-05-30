@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { glassSurfaceStyle } from '@/components/screen-background';
 import { ThemedText } from '@/components/themed-text';
@@ -19,16 +19,18 @@ export function CollapsiblePreviewSection({
   collapsible?: boolean;
   previewHeight?: number;
 }) {
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  const webDefaultExpanded = Platform.OS === 'web';
+  const sectionCollapsible = Platform.OS === 'web' ? true : collapsible;
+  const [expanded, setExpanded] = useState(webDefaultExpanded || defaultExpanded);
 
   return (
     <View style={[glassSurfaceStyle, styles.section]}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${expanded ? 'Collapse' : 'Expand'} ${title}`}
-        disabled={!collapsible}
+        disabled={!sectionCollapsible}
         onPress={() => {
-          if (collapsible) {
+          if (sectionCollapsible) {
             setExpanded((current) => !current);
           }
         }}
@@ -40,7 +42,7 @@ export function CollapsiblePreviewSection({
           darkColor={Palette.yosemiteIvory}>
           {title}
         </ThemedText>
-        {collapsible ? (
+        {sectionCollapsible ? (
           <View style={styles.chevronBadge}>
             <IconSymbol
               name={expanded ? 'chevron.up' : 'chevron.down'}
@@ -50,7 +52,7 @@ export function CollapsiblePreviewSection({
           </View>
         ) : null}
       </Pressable>
-      <View style={[styles.content, collapsible && !expanded && { maxHeight: previewHeight, overflow: 'hidden' }]}>
+      <View style={[styles.content, sectionCollapsible && !expanded && { maxHeight: previewHeight, overflow: 'hidden' }]}>
         {children}
       </View>
     </View>

@@ -1,27 +1,76 @@
-myDefendtheParksApp Source-Available License
-Copyright (c) mp3li
+Defend the Parks by mp3li Source-Available License
+Version 1.0
 
-This repository is source-available. It is not open source.
+Copyright (c) 2026 mp3li. All rights reserved.
+
+This repository and its contents are made source-available for limited review,
+evaluation, and educational grading purposes only.
+
+1. Permission Granted
 
 You may:
-- view the source code
-- download the source code
-- run the source code locally for personal, educational, evaluation, and portfolio-review purposes
-- modify the source code for your own private local use
 
-You may not:
-- redistribute this source code, in whole or in part
-- publish forks, mirrors, or reuploads of this source code
-- sublicense, sell, or commercially distribute this source code or modified versions of it
-- use this source code or modified versions of it as part of a paid product, paid service, or commercial offering
-- remove or alter author attribution or this license notice
+- view the source code;
+- review the source code for educational, portfolio, hiring, or grading purposes;
+- run the project locally for evaluation using your own API keys and local
+  environment; and
+- access the deployed early-access web version if you have been provided an
+  access code directly by mp3li.
 
-No trademark or branding rights are granted.
+2. Restrictions
 
-All rights not expressly granted above are reserved.
+Unless you have prior written permission from mp3li, you may not:
 
-Future versions:
-The author may stop distributing source code for future versions of this project at any time. Future versions may be released under different terms, or may be distributed without source code. This license applies only to the version(s) of the source code that are actually published with this license.
+- copy this project or any substantial portion of it;
+- fork this repository for reuse, redistribution, publication, or derivative
+  work;
+- modify and redistribute the project;
+- sublicense, sell, rent, lease, or commercially exploit the project;
+- use the project, source code, design, documentation, assets, or structure in
+  another product or repository;
+- remove or alter copyright, license, attribution, or source-available notices;
+  or
+- represent this project or any derivative as your own work.
 
-No warranty:
-This software is provided "as is", without warranty of any kind, express or implied. The author is not liable for any claim, damages, or other liability arising from the software or its use.
+3. No Open Source Grant
+
+This is a source-available license, not an open-source license. No rights are
+granted under any open-source license unless a separate written license from
+mp3li explicitly says otherwise.
+
+4. Third-Party Services, APIs, and Assets
+
+This project may reference third-party APIs, data sources, images, fonts, or
+services. Those third-party materials remain subject to their own terms,
+licenses, and attribution requirements. This license does not grant any rights
+to third-party materials.
+
+API keys, credentials, access codes, and environment variables are not licensed
+for reuse and must not be copied, published, shared, or extracted.
+
+5. Early Access Deployment
+
+The deployed web version may be limited to early-access users who have been
+provided an access code directly by mp3li. Access to the deployed version does
+not grant permission to copy, reuse, redistribute, modify, or commercialize the
+project.
+
+6. Instructor and Evaluation Use
+
+Instructors, reviewers, and evaluators may view and run this project for the
+purpose of evaluating the submitted work. Local execution may require separate
+API keys or service credentials. This evaluation permission does not grant reuse,
+redistribution, publication, or derivative-work rights.
+
+7. No Warranty
+
+This project is provided "as is", without warranty of any kind, express or
+implied, including but not limited to warranties of merchantability, fitness for
+a particular purpose, and noninfringement. In no event shall mp3li be liable for
+any claim, damages, or other liability arising from use of or inability to use
+the project.
+
+8. Contact
+
+For permission requests or licensing questions, contact mp3li through the
+project owner's official channels.
