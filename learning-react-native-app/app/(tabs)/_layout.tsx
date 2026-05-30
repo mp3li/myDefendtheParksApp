@@ -1,6 +1,6 @@
 import { Tabs, usePathname } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, useWindowDimensions } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -11,9 +11,11 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const pathname = usePathname();
+  const { width } = useWindowDimensions();
   const { savedParks } = useSavedParks();
   const savedCount = savedParks.length;
   const searchSelected = pathname.startsWith('/states/') || pathname.startsWith('/parks/');
+  const showMobileTabBar = Platform.OS !== 'web' || width < 900;
 
   return (
     <Tabs
@@ -21,7 +23,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: Palette.yosemiteIvory,
         tabBarInactiveTintColor: Palette.campfire,
         tabBarStyle: {
-          display: Platform.OS === 'web' ? 'none' : 'flex',
+          display: showMobileTabBar ? 'flex' : 'none',
           backgroundColor: SurfaceColors.navLight,
           borderTopColor: Palette.summitBlush,
           shadowColor: Palette.campfire,

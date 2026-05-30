@@ -178,49 +178,56 @@ export default function HomeScreen() {
           transparent
           animationType="fade">
           <View style={styles.accessOverlay}>
-            <ThemedView style={[styles.accessCard, glassSurfaceStyle]}>
-              <ThemedText
-                type="title"
-                accessibilityRole="header"
-                lightColor={Colors.light.icon}
-                darkColor={Colors.dark.text}>
-                Welcome to Defend the Parks by mp3li
-              </ThemedText>
-              <ThemedText>
-                Defend the Parks is a mobile app for exploring National Parks and other locations
-                maintained by the National Park Service while learning about Indigenous languages,
-                territories, treaties, placenames, nearby sovereignty records, and public Native Land
-                resources. The app includes &apos;Where Are We? Mode&apos; for GPS-based land context on where
-                you are currently located, an in-app compass, and &apos;Journey Mode&apos; for travel-aware
-                updates when a user moves into an area that returns new Native Land API information.
-              </ThemedText>
-              <ThemedText>
-                Defend the Parks by mp3li is currently only available to early supporters who have
-                been provided an early access code directly from mp3li. If you have been provided the
-                code, enter it below.
-              </ThemedText>
-              <ThemedText type="defaultSemiBold">Access code:</ThemedText>
-              <TextInput
-                value={accessCodeInput}
-                onChangeText={(value) => {
-                  setAccessCodeInput(value);
-                  setAccessError('');
-                }}
-                onSubmitEditing={submitAccessCode}
-                autoCapitalize="characters"
-                autoCorrect={false}
-                secureTextEntry
-                accessibilityLabel="Access code"
-                style={styles.accessInput}
-              />
-              {accessError ? <ThemedText style={styles.accessError}>{accessError}</ThemedText> : null}
-              <AccessibleButton
-                label="Enter"
-                onPress={submitAccessCode}
-                variant="primary"
-                accessibilityHint="Submits the early access code"
-              />
-            </ThemedView>
+            <ScrollView
+              style={styles.accessScroll}
+              contentContainerStyle={styles.accessScrollContent}
+              keyboardShouldPersistTaps="handled">
+              <ThemedView style={[styles.accessCard, glassSurfaceStyle]}>
+                <ThemedText
+                  type="title"
+                  accessibilityRole="header"
+                  lightColor={Colors.light.icon}
+                  darkColor={Colors.dark.text}>
+                  Welcome to Defend the Parks by mp3li
+                </ThemedText>
+                <ThemedText lightColor={Colors.light.text} darkColor={Colors.light.text}>
+                  Defend the Parks is a mobile app for exploring National Parks and other locations
+                  maintained by the National Park Service while learning about Indigenous languages,
+                  territories, treaties, placenames, nearby sovereignty records, and public Native Land
+                  resources. The app includes &apos;Where Are We? Mode&apos; for GPS-based land context on where
+                  you are currently located, an in-app compass, and &apos;Journey Mode&apos; for travel-aware
+                  updates when a user moves into an area that returns new Native Land API information.
+                </ThemedText>
+                <ThemedText lightColor={Colors.light.text} darkColor={Colors.light.text}>
+                  Defend the Parks by mp3li is currently only available to early supporters who have
+                  been provided an early access code directly from mp3li. If you have been provided the
+                  code, enter it below.
+                </ThemedText>
+                <ThemedText type="defaultSemiBold" lightColor={Colors.light.text} darkColor={Colors.light.text}>
+                  Access code:
+                </ThemedText>
+                <TextInput
+                  value={accessCodeInput}
+                  onChangeText={(value) => {
+                    setAccessCodeInput(value);
+                    setAccessError('');
+                  }}
+                  onSubmitEditing={submitAccessCode}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  secureTextEntry
+                  accessibilityLabel="Access code"
+                  style={styles.accessInput}
+                />
+                {accessError ? <ThemedText style={styles.accessError}>{accessError}</ThemedText> : null}
+                <AccessibleButton
+                  label="Enter"
+                  onPress={submitAccessCode}
+                  variant="primary"
+                  accessibilityHint="Submits the early access code"
+                />
+              </ThemedView>
+            </ScrollView>
           </View>
         </Modal>
         <ResponsiveContainer style={{ gap: padding, paddingTop: 0 }}>
@@ -444,10 +451,17 @@ const styles = StyleSheet.create({
   },
   accessOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(4, 4, 12, 0.72)',
+  },
+  accessScroll: {
+    flex: 1,
+  },
+  accessScrollContent: {
+    minHeight: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 18,
-    backgroundColor: 'rgba(4, 4, 12, 0.72)',
+    paddingVertical: 28,
   },
   accessCard: {
     width: '100%',

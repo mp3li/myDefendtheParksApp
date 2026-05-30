@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, type Href } from 'expo-router';
-import { Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -24,11 +24,13 @@ export function AppHeader() {
   const router = useRouter();
   const pathname = usePathname();
   const { sections, jumpToSection } = usePageSections();
+  const { width } = useWindowDimensions();
   const [menuOpen, setMenuOpen] = useState(false);
   const [history, setHistory] = useState<string[]>([pathname]);
   const suppressNextHistoryPush = useRef(false);
   const menuSections = sections.length > 0 ? sections : [{ id: 'top', label: 'Top' }];
   const showBackBar = pathname !== '/';
+  const showDesktopWebNav = Platform.OS === 'web' && width >= 900;
   const webNavItems: { label: string; href: string; icon: IconSymbolName }[] = [
     { label: 'Homepage', href: '/', icon: 'house.fill' },
     { label: 'Search by State', href: '/explore', icon: 'magnifyingglass' },
@@ -77,7 +79,7 @@ export function AppHeader() {
               accessibilityRole="header">
               Defend the Parks by mp3li
             </ThemedText>
-            {Platform.OS === 'web' ? (
+            {showDesktopWebNav ? (
               <View style={styles.webNav}>
                 {webNavItems.map((item) => {
                   const active =
