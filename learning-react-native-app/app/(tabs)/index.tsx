@@ -25,7 +25,6 @@ import { fetchNationalParksGalleryImages, fetchParkOfTheDay } from '@/services/n
 import type { IndigenousContextData, NpsParkImage, ParkOfTheDay } from '@/types/parks';
 import { getSectionNativeId, jumpToWebSection, PAGE_SCROLL_NATIVE_ID } from '@/utils/jump-to-section';
 
-const WEB_ACCESS_CODE = 'REDACTED_ACCESS_CODE';
 const WEB_ACCESS_STORAGE_KEY = 'defendTheParksWebAccessGranted';
 
 function formatDateWithOrdinal(isoDate: string) {
@@ -81,6 +80,7 @@ export default function HomeScreen() {
   const [webAccessGranted, setWebAccessGranted] = useState(Platform.OS !== 'web');
   const [accessCodeInput, setAccessCodeInput] = useState('');
   const [accessError, setAccessError] = useState('');
+  const [accessSubmitting, setAccessSubmitting] = useState(false);
   const aboutCollapsible = Platform.OS !== 'web';
 
   useEffect(() => {
@@ -155,19 +155,44 @@ export default function HomeScreen() {
     showSnackbar(savedNow ? 'Park saved to your list.' : 'Park removed from your list.', 'info');
   }, [parkOfTheDay?.park, showSnackbar, toggleSavedPark]);
 
-  const submitAccessCode = useCallback(() => {
+  const submitAccessCode = useCallback(async () => {
     const normalizedCode = accessCodeInput.trim().toUpperCase();
-    if (normalizedCode !== WEB_ACCESS_CODE) {
-      setAccessError('That access code is not valid.');
+    if (!normalizedCode) {
+      setAccessError('Enter the early access code to continue.');
       return;
     }
 
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      window.localStorage.setItem(WEB_ACCESS_STORAGE_KEY, 'true');
-    }
+    try {
+      setAccessSubmitting(true);
+      const response = await fetch('/api/access-code', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ code: normalizedCode }),
+      });
 
-    setWebAccessGranted(true);
-    setAccessError('');
+      if (!response.ok) {
+        throw new Error('Access code request failed.');
+      }
+
+      const result = (await response.json()) as { granted?: boolean };
+      if (!result.granted) {
+        setAccessError('That access code is not valid.');
+        return;
+      }
+
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        window.localStorage.setItem(WEB_ACCESS_STORAGE_KEY, 'true');
+      }
+
+      setWebAccessGranted(true);
+      setAccessError('');
+    } catch {
+      setAccessError('That access code is not valid.');
+    } finally {
+      setAccessSubmitting(false);
+    }
   }, [accessCodeInput]);
 
   return (
@@ -221,8 +246,11 @@ export default function HomeScreen() {
                 />
                 {accessError ? <ThemedText style={styles.accessError}>{accessError}</ThemedText> : null}
                 <AccessibleButton
-                  label="Enter"
-                  onPress={submitAccessCode}
+                  label={accessSubmitting ? 'Checking...' : 'Enter'}
+                  onPress={() => {
+                    void submitAccessCode();
+                  }}
+                  disabled={accessSubmitting}
                   variant="primary"
                   accessibilityHint="Submits the early access code"
                 />
