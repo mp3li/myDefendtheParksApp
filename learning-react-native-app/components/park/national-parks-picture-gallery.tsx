@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { AccessibleButton } from '@/components/accessible-button';
 import { CollapsiblePreviewSection } from '@/components/collapsible-preview-section';
@@ -11,7 +11,9 @@ import type { NpsParkImage } from '@/types/parks';
 const GALLERY_PAGE_SIZE = 10;
 
 export function NationalParksPictureGallery({ images }: { images: NpsParkImage[] }) {
+  const { width } = useWindowDimensions();
   const isWeb = Platform.OS === 'web';
+  const isDesktopWeb = isWeb && width >= 900;
   const [selectedImage, setSelectedImage] = useState<NpsParkImage | null>(null);
   const [visibleCount, setVisibleCount] = useState(GALLERY_PAGE_SIZE);
   const visibleImages = isWeb
@@ -40,14 +42,14 @@ export function NationalParksPictureGallery({ images }: { images: NpsParkImage[]
                 accessibilityRole="imagebutton"
                 accessibilityLabel={`Open ${image.title || `photo ${index + 1}`} full size`}
                 onPress={() => setSelectedImage(image)}>
-                <View style={[styles.imageCard, isWeb && styles.webImageCard]}>
+                <View style={[styles.imageCard, isDesktopWeb && styles.webImageCard]}>
                   <Image
                     source={{ uri: image.url }}
-                    style={[styles.galleryImage, isWeb && styles.webGalleryImage]}
+                    style={[styles.galleryImage, isDesktopWeb && styles.webGalleryImage]}
                     contentFit="cover"
                     accessibilityLabel={image.altText || image.title || 'Park photo'}
                   />
-                  <View style={[styles.imageMeta, isWeb && styles.webImageMeta]}>
+                  <View style={[styles.imageMeta, isDesktopWeb && styles.webImageMeta]}>
                     <ThemedText type="defaultSemiBold">{image.title || `Photo ${index + 1}`}</ThemedText>
                     {!!image.credit && <ThemedText>Credit: {image.credit}</ThemedText>}
                     {!!image.caption && <ThemedText>{image.caption}</ThemedText>}
